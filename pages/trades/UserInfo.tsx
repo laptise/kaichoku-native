@@ -9,7 +9,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import RequestInfo from "./RequestInfo";
 import { Button } from "react-native-elements";
-import countries, { Country } from "./../../data/countries";
+import countries, { Country } from "../../data/countries";
 import { TIMESTAMPToJsDate } from "../../functions";
 import MaskedView from "@react-native-community/masked-view";
 import { InitialState, Props } from "../../store/reducer";

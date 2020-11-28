@@ -7,11 +7,11 @@ import { setMenuView, setDbh, setFirebase, setUser } from "./store/action";
 import reducer, { Props } from "./store/reducer";
 import Menu from "./partial/Menu";
 import Header from "./partial/Header";
-import Blocker from "./components/Login";
-import Setting from "./components/menus/Menu";
-import Home from "./components/home/Home";
+import Blocker from "./pages/Login";
+import Setting from "./pages/menus/Menu";
+import Home from "./pages/home/Home";
 import { InitialState, NavigationContainer } from "@react-navigation/native";
-import TradeIndex from "./components/dashboard/Dashboard";
+import TradeIndex from "./pages/dashboard/Dashboard";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import {

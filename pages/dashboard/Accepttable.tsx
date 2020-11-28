@@ -9,12 +9,10 @@ import {
 import { Button, Divider, Text } from "react-native-elements";
 import themeColor from "../../colors";
 import Axios from "axios";
-
 import { LinearGradient } from "expo-linear-gradient";
 import { TextInput } from "react-native-gesture-handler";
 function Accept({ navigation, acceptableList }) {
   const [questList, setQuestList] = useState(null);
-
   const getQuestList = () => {
     setQuestList(acceptableList);
     //setQuestList(res.data);
