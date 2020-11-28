@@ -1,12 +1,6 @@
 import React, { useRef, useState } from "react";
-import {
-  StyleSheet,
-  View,
-  TextInput,
-  TextInputIOSProps,
-  TextInputProps,
-} from "react-native";
-import color from "./colors";
+import { StyleSheet, View, TextInput, TextInputProps } from "react-native";
+import color from "../pages/dashboard/components/colors";
 import { Button, Text } from "react-native-elements";
 export const table = StyleSheet.create({
   table: {

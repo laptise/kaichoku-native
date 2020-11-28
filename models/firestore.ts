@@ -7,6 +7,7 @@ export class Trade {
   title: string;
   created_at: Date;
   requester_id: string;
+  id: string;
   constructor(
     name: string,
     place: string,
@@ -14,7 +15,8 @@ export class Trade {
     fee: number,
     title: string,
     created_at: Date,
-    requester_id: string
+    requester_id: string,
+    id: string
   ) {
     this.name = name;
     this.place = place;
@@ -23,6 +25,7 @@ export class Trade {
     this.title = title;
     this.created_at = created_at;
     this.requester_id = requester_id;
+    this.id = id;
   }
 }
 export const TradeConverter = {
@@ -46,7 +49,8 @@ export const TradeConverter = {
       data.fee,
       data.title,
       data.created_at,
-      data.requester_id
+      data.requester_id,
+      data.id
     );
   },
 };

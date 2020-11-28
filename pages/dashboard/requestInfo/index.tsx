@@ -2,13 +2,13 @@ import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View, Image, RefreshControl } from "react-native";
 import { Divider, Button } from "react-native-elements";
 import { connect } from "react-redux";
-import themeColor from "../../colors";
+import themeColor from "../components/colors";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import MaskedView from "@react-native-community/masked-view";
 import Swiper from "react-native-swiper";
 import { faCrown } from "@fortawesome/free-solid-svg-icons";
 import { ScrollView } from "react-native-gesture-handler";
-import { InitialState, Props } from "../../store/reducer";
+import { InitialState, Props } from "../../../store/reducer";
 const images = [
   {
     // Simplest usage.

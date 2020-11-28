@@ -1,11 +1,9 @@
-import { faVoicemail } from "@fortawesome/free-solid-svg-icons";
 import Axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Button, StyleSheet, View, Animated } from "react-native";
 import { Text } from "react-native-elements";
-import { LinearGradient } from "react-native-linear-gradient";
 import { Divider } from "react-native-elements";
-import themeColor from "../../colors";
+import themeColor from "../dashboard/components/colors";
 function ExchangeRate() {
   const [JPYRate, SetJPYRate] = useState(0);
   const [KRWRate, SetKRWRate] = useState(0);

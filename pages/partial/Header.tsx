@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { postLogin, setMenuView } from "../store/action";
+import { postLogin, setMenuView } from "../../store/action";
 import { Button, StyleSheet, Text, View, Animated } from "react-native";
 import { connect } from "react-redux";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { FontAwesome } from "@expo/vector-icons";
-import { InitialState, Props } from "../store/reducer";
+import { InitialState, Props } from "../../store/reducer";
 import { faBars, faChevronRight } from "@fortawesome/free-solid-svg-icons";
-import themeColor from "../colors";
+import themeColor from "../dashboard/components/colors";
 import {
   faHome,
   faEllipsisH,

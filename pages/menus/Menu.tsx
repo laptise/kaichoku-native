@@ -1,9 +1,7 @@
 import React from "react";
 import { StyleSheet, Text, View, Animated } from "react-native";
 import { createStackNavigator } from "@react-navigation/stack";
-import themeColor from "../../colors";
-import Accept from "../dashboard/Accepttable";
-import Requset from "../dashboard/Request";
+import themeColor from "../dashboard/components/colors";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { Button } from "react-native-elements";

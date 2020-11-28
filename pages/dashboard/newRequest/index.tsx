@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { InitialState, Props } from "../../store/reducer";
+import { InitialState, Props } from "../../../store/reducer";
 import {
   StyleSheet,
   View,
@@ -10,13 +10,13 @@ import {
 } from "react-native";
 import { connect } from "react-redux";
 import { Button, Text } from "react-native-elements";
-import themeColor from "../../colors";
+import themeColor from "../components/colors";
 import {
   categories,
   majorCategories,
   middleCategories,
-} from "../../data/categories";
-import { Trade, TradeConverter } from "../../models/firestore";
+} from "../../../data/categories";
+import { Trade, TradeConverter } from "../../../models/firestore";
 import * as ImagePicker from "expo-image-picker";
 import Constants from "expo-constants";
 interface FormData {
@@ -77,7 +77,8 @@ function AddNewRequest({ navigation, route, state }: Props) {
           100,
           formData.requestTitle,
           new Date(),
-          auth.currentUser.uid
+          auth.currentUser.uid,
+          "d"
         )
       )
       .then(() => true);

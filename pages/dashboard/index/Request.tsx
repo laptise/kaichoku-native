@@ -7,7 +7,7 @@ import {
   faPlane,
 } from "@fortawesome/free-solid-svg-icons";
 import { Button, Divider } from "react-native-elements";
-import themeColor from "../../colors";
+import themeColor from "../components/colors";
 function Requset(props) {
   return (
     <View style={[style.body, { marginTop: 5 }]}>

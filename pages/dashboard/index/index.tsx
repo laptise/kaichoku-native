@@ -2,32 +2,26 @@ import React, { useEffect, useState, useCallback } from "react";
 import { StyleSheet, Text, View, Animated, RefreshControl } from "react-native";
 import { connect } from "react-redux";
 import { createStackNavigator } from "@react-navigation/stack";
-import themeColor from "../../colors";
+import themeColor from "../components/colors";
 import Accepttable from "./Accepttable";
 import MyRequest from "./MyRequest";
 import Requset from "./Request";
-import AddNewRequest from "../trades/AddNewRequest";
+import AddNewRequest from "../newRequest";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
-import RequestInfo from "../trades/RequestInfo";
+import RequestInfo from "../requestInfo";
 import { Button } from "react-native-elements";
-import UserInfo from "../trades/UserInfo";
-import { InitialState, Props } from "../../store/reducer";
+import UserInfo from "../userInfo";
+import { InitialState, Props } from "../../../store/reducer";
 import { ScrollView } from "react-native-gesture-handler";
-const wait = (timeout) => {
-  return new Promise((resolve) => {
-    setTimeout(resolve, timeout);
-  });
-};
+
 function TradesMain({ navigation, state }: Props) {
   const [AcceptableList, setAcceptableList] = useState([]);
   const [TradingsList, setTradingsList] = useState([]);
   const [RequestingList, setRequestingList] = useState([]);
-
   const [refreshing, setRefreshing] = useState(false);
   const auth = state.firebase && state.firebase.auth();
   const db = state.firebase.firestore();
-
   const load = async () => {
     setAcceptableList([]);
     setTradingsList([]);
@@ -107,38 +101,11 @@ function TradesMain({ navigation, state }: Props) {
   );
 }
 
-const Stack = createStackNavigator();
-
-function tradesIndex({ navigation }) {
-  return (
-    <View style={{ flex: 1 }}>
-      <Stack.Navigator
-        initialRouteName="Home"
-        screenOptions={{
-          headerShown: false,
-        }}
-      >
-        <Stack.Screen name="Home" component={TradesMainContainer} />
-        <Stack.Screen name="NewRequest" component={AddNewRequest} />
-        <Stack.Screen name="RequestInfo" component={RequestInfo} />
-        <Stack.Screen name="UserInfo" component={UserInfo} />
-      </Stack.Navigator>
-    </View>
-  );
-}
-
 function mapStateToProps(state: InitialState) {
   return { state };
 }
 
-function mapDispatchToProps(dispatch) {
-  return {};
-}
-
-const TradesMainContainer = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(TradesMain);
+const TradesMainContainer = connect(mapStateToProps)(TradesMain);
 const css = StyleSheet.create({
   home: { height: "100%", position: "relative" },
   addNewButton: {
@@ -168,4 +135,5 @@ const style = StyleSheet.create({
     fontSize: 20,
   },
 });
-export default tradesIndex;
+
+export default TradesMainContainer;

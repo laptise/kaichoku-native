@@ -1,18 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View, Image } from "react-native";
 import { createStackNavigator } from "@react-navigation/stack";
-import themeColor from "../../colors";
-import Accept from "../dashboard/Accepttable";
-import Requset from "../dashboard/Request";
-import AddNewRequest from "./AddNewRequest";
+import themeColor from "../components/colors";
+import AddNewRequest from "../newRequest";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
-import RequestInfo from "./RequestInfo";
+import RequestInfo from "../requestInfo";
 import { Button } from "react-native-elements";
-import countries, { Country } from "../../data/countries";
-import { TIMESTAMPToJsDate } from "../../functions";
+import countries, { Country } from "../../../data/countries";
 import MaskedView from "@react-native-community/masked-view";
-import { InitialState, Props } from "../../store/reducer";
+import { InitialState, Props } from "../../../store/reducer";
 class User {
   uid: number;
   nation: Country;

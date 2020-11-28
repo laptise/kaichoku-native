@@ -1,13 +1,13 @@
 import React, { useEffect, useRef } from "react";
-import themeColor from "../colors";
-import { logOut, setMenuView, setUser } from "../store/action";
+import themeColor from "../dashboard/components/colors";
+import { logOut, setMenuView, setUser } from "../../store/action";
 import { StyleSheet, View, Animated } from "react-native";
 import { Divider, Text, Button } from "react-native-elements";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { connect } from "react-redux";
 import { FontAwesome } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { InitialState } from "../store/reducer";
+import { InitialState } from "../../store/reducer";
 interface Props {
   state: InitialState;
   setUser: any;

@@ -5,13 +5,13 @@ import { connect, Provider } from "react-redux";
 import { SafeAreaView, StyleSheet, Text, View } from "react-native";
 import { setMenuView, setDbh, setFirebase, setUser } from "./store/action";
 import reducer, { Props } from "./store/reducer";
-import Menu from "./partial/Menu";
-import Header from "./partial/Header";
-import Blocker from "./pages/Login";
+import Menu from "./pages/partial/Menu";
+import Header from "./pages/partial/Header";
+import Blocker from "./pages/login";
 import Setting from "./pages/menus/Menu";
 import Home from "./pages/home/Home";
 import { InitialState, NavigationContainer } from "@react-navigation/native";
-import TradeIndex from "./pages/dashboard/Dashboard";
+import TradeIndex from "./pages/dashboard/index";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import {
@@ -90,7 +90,6 @@ function mapDispatchToProps(dispatch) {
     },
   };
 }
-console.log(process.env.NODE_ENV);
 const AppContainer = connect(mapStateToProps, mapDispatchToProps)(App);
 
 function AppProvider() {
