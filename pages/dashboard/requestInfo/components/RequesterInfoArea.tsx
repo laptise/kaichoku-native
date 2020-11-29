@@ -6,9 +6,9 @@ import MaskedView from "@react-native-community/masked-view";
 import { faCrown } from "@fortawesome/free-solid-svg-icons";
 import { Props } from "../../../../store/reducer";
 interface NewProps extends Props {
-  onPress: () => void;
+  action: () => void;
 }
-function RequesterInfoArea({ user, onPress }: NewProps) {
+function RequesterInfoArea({ user, action }: NewProps) {
   return (
     <View
       style={{
@@ -53,7 +53,7 @@ function RequesterInfoArea({ user, onPress }: NewProps) {
           />
         </MaskedView>
         <Text
-          onPress={onPress}
+          onPress={action}
           style={{ fontWeight: "bold", fontSize: 16, marginTop: 5 }}
         >
           {user.nickname}

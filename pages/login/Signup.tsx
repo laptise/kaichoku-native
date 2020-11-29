@@ -38,11 +38,11 @@ function Singup({ navigation, state }: Props) {
           .set(
             new User.Class(
               user.uid,
-              null,
-              form.country.code,
               user.email,
+              form.nickname,
+              form.country.code,
               new Date(),
-              form.nickname
+              null
             )
           );
       })

@@ -1,17 +1,17 @@
 class User {
-  comment: string;
-  countryCode: number;
-  email: string;
-  entryDate: Date;
-  nickname: string;
   uid: string;
+  email: string;
+  nickname: string;
+  countryCode: number;
+  entryDate: Date;
+  comment: string;
   constructor(
     uid: string,
-    comment: string,
-    countryCode: number,
     email: string,
+    nickname: string,
+    countryCode: number,
     entryDate: Date,
-    nickname: string
+    comment: string
   ) {
     this.comment = comment;
     this.countryCode = countryCode;
@@ -25,11 +25,11 @@ const Converter = {
   toFirestore: function (user: User) {
     return {
       uid: user.uid,
-      comment: user.comment,
-      countryCode: user.countryCode,
       email: user.email,
-      entryDate: user.entryDate,
       nickname: user.nickname,
+      countryCode: user.countryCode,
+      entryDate: user.entryDate,
+      comment: user.comment,
     };
   },
   fromFirestore: function (
@@ -38,12 +38,12 @@ const Converter = {
   ): User {
     const user = snapshot.data(options);
     return new User(
-      user.comment,
-      user.countryCode,
+      user.uid,
       user.email,
-      user.entryDate.toDate(),
       user.nickname,
-      user.uid
+      user.countryCode,
+      user.entryDate.toDate(),
+      user.comment
     );
   },
 };

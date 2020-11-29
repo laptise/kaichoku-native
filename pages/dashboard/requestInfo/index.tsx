@@ -232,9 +232,11 @@ function RequestInfo({ route, navigation, state }: Props) {
               의뢰자정보
             </Text>
             <RequesterInfoArea
-              onPress={navigation.navigate("UserInfo", {
-                uid: requester.uid,
-              })}
+              action={() => {
+                navigation.navigate("UserInfo", {
+                  uid: requester.uid,
+                });
+              }}
               navigation={navigation}
               user={requester}
             />

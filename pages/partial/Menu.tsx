@@ -38,6 +38,7 @@ function Menu({ state, setUser, setMenuView }: Props) {
     } else {
       transformMenu(100);
     }
+    console.log(state.user);
   }, [state]);
   return (
     <Animated.View

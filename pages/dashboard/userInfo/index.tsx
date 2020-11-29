@@ -1,43 +1,33 @@
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View, Image } from "react-native";
 import { connect } from "react-redux";
-import countries, { Country } from "../../../data/countries";
 import MaskedView from "@react-native-community/masked-view";
 import { InitialState, Props } from "../../../store/reducer";
 import * as User from "../../../firebase/firestore/users";
-
-function UserInfo({ route, navigation, state }: Props) {
+import * as Country from "../../../firebase/firestore/country";
+function UserInfo({ route, state }: Props) {
   //route.params.id
   const [user, setUser] = useState(null as User.Class);
+  const [country, setCountry] = useState(null as Country.Class);
   useEffect(() => {
     state.firebase
       .firestore()
       .collection("users")
       .doc(route.params.uid)
+      .withConverter(User.Converter)
       .get()
-      .then((res) => res.data())
-      .then((res) => {
-        res.uid = route.params.uid;
-        res.entryDate = res.entryDate.toDate();
-        return res;
-      })
-      .then((res) =>
+      .then((res) => setUser(res.data()))
+      .then(() =>
         state.firebase
           .firestore()
           .collection("countries")
-          .doc(`${res.countryCode}`)
+          .doc(String(user.countryCode))
+          .withConverter(Country.Converter)
           .get()
-          .then((countryRes) => {
-            res.nation = countryRes.data().name;
-            return res;
-          })
-      )
-      .then((res) => {
-        setUser(res as any);
-        return user;
-      });
+          .then((res) => setCountry(res.data()))
+      );
   }, []);
-  if (user)
+  if (user && country)
     return (
       <View style={style.container}>
         <MaskedView
@@ -79,7 +69,7 @@ function UserInfo({ route, navigation, state }: Props) {
             {user.entryDate.getFullYear()}년 {user.entryDate.getMonth() + 1}월{" "}
             {user.entryDate.getDate()}일부터 이용함
           </Text>
-          <Text>NATION : sfk</Text>
+          <Text>NATION : {country.name}</Text>
         </View>
         <Text
           style={{
