@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { createStore } from "redux";
+import { createStore, Dispatch } from "redux";
 import { StatusBar } from "expo-status-bar";
 import { connect, Provider } from "react-redux";
 import { SafeAreaView, StyleSheet, Text, View } from "react-native";
@@ -74,7 +74,7 @@ function mapStateToProps(state: InitialState) {
   return { state };
 }
 
-function mapDispatchToProps(dispatch) {
+function mapDispatchToProps(dispatch: Dispatch): Props {
   return {
     setMenuView(status) {
       dispatch(setMenuView(status));

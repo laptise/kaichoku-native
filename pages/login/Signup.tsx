@@ -4,9 +4,9 @@ import { Button } from "react-native-elements";
 import { connect } from "react-redux";
 import firebase from "../../firebase";
 import { Props } from "../../store/reducer";
-import { User, UserConverter } from "../../models/firestore";
-import { table, LabelInput } from "../../style";
-import themeColor from "../dashboard/components/colors";
+import * as User from "../../firebase/firestore/users";
+import { table, LabelInput } from "../../components/Styles";
+import themeColor from "../../components/colors";
 import countries, { Country } from "../../data/countries";
 import { ScrollView } from "react-native-gesture-handler";
 import Icon from "react-native-vector-icons/FontAwesome";
@@ -33,10 +33,11 @@ function Singup({ navigation, state }: Props) {
         const user = res.user;
         return db
           .collection("users")
-          .withConverter(UserConverter)
+          .withConverter(User.Converter)
           .doc(user.uid)
           .set(
-            new User(
+            new User.Class(
+              user.uid,
               null,
               form.country.code,
               user.email,

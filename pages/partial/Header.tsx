@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { FontAwesome } from "@expo/vector-icons";
 import { InitialState, Props } from "../../store/reducer";
 import { faBars, faChevronRight } from "@fortawesome/free-solid-svg-icons";
-import themeColor from "../dashboard/components/colors";
+import themeColor from "../../components/colors";
 import {
   faHome,
   faEllipsisH,

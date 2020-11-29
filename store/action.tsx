@@ -1,6 +1,6 @@
 // ActionCreator
 
-import { User } from "../models/firestore";
+import * as User from "../firebase/firestore/users";
 
 export const SET_FIREBASE = "SET_FIREBASE";
 export const setFirebase = (firebase) => {
@@ -50,7 +50,7 @@ export const logOut = () => {
 };
 
 export const SET_USER = "SET_USER";
-export const setUser = (userInfo: User) => {
+export const setUser = (userInfo: User.Class) => {
   return {
     type: SET_USER,
     userInfo,

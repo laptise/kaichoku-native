@@ -7,11 +7,11 @@ import {
   faPlane,
 } from "@fortawesome/free-solid-svg-icons";
 import { Button, Divider, Text } from "react-native-elements";
-import themeColor from "../components/colors";
+import themeColor from "../../../components/colors";
 import { LinearGradient } from "expo-linear-gradient";
 import { TextInput } from "react-native-gesture-handler";
 import SingleTradeOnList from "../components/SingleTradeOnList";
-import { Trade } from "../../../models/firestore";
+import * as Trade from "../../../firebase/firestore/trades";
 function Accept({ navigation, acceptableList }) {
   const [questList, setQuestList] = useState(null);
   const getQuestList = () => {
@@ -38,7 +38,7 @@ function Accept({ navigation, acceptableList }) {
       <Text style={[style.inner]}>아직 의뢰중인 거래가 없습니다!</Text>
 
       {questList &&
-        questList.map((quest: Trade) => (
+        questList.map((quest: Trade.Class) => (
           <SingleTradeOnList
             key={quest.id}
             trade={quest}

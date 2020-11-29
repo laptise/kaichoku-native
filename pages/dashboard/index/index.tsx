@@ -1,17 +1,13 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { StyleSheet, Text, View, Animated, RefreshControl } from "react-native";
 import { connect } from "react-redux";
-import { createStackNavigator } from "@react-navigation/stack";
-import themeColor from "../components/colors";
+import themeColor from "../../../components/colors";
 import Accepttable from "./Accepttable";
 import MyRequest from "./MyRequest";
 import Requset from "./Request";
-import AddNewRequest from "../newRequest";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
-import RequestInfo from "../requestInfo";
 import { Button } from "react-native-elements";
-import UserInfo from "../userInfo";
 import { InitialState, Props } from "../../../store/reducer";
 import { ScrollView } from "react-native-gesture-handler";
 

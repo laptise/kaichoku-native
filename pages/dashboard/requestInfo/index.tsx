@@ -2,13 +2,16 @@ import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View, Image, RefreshControl } from "react-native";
 import { Divider, Button } from "react-native-elements";
 import { connect } from "react-redux";
-import themeColor from "../components/colors";
+import themeColor from "../../../components/colors";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import MaskedView from "@react-native-community/masked-view";
 import Swiper from "react-native-swiper";
 import { faCrown } from "@fortawesome/free-solid-svg-icons";
 import { ScrollView } from "react-native-gesture-handler";
 import { InitialState, Props } from "../../../store/reducer";
+import * as Trade from "../../../firebase/firestore/trades";
+import * as User from "../../../firebase/firestore/users";
+import RequesterInfoArea from "./components/RequesterInfoArea";
 const images = [
   {
     // Simplest usage.
@@ -24,56 +27,29 @@ const images = [
     },
   },
 ];
-interface Requester {
-  id: number;
-  nickname: string;
-}
-class RequestItem {
-  id: number;
-  name: string;
-  place: string;
-  requseterId: string;
-  title: string;
-  price: number;
-  created_at: Date;
-  fee: number;
-  requester: any;
-  constructor(res) {
-    this.id = res.id;
-    this.fee = res.fee;
-    this.name = res.name;
-    this.title = res.title;
-    this.price = res.price;
-    this.place = res.place;
-    this.requseterId = res.requester_id;
-    this.created_at = res.created_at;
-  }
-}
 function RequestInfo({ route, navigation, state }: Props) {
   const [refreshing, setRefreshing] = useState(false);
   const { id } = route.params;
-  const [result, setResult] = useState(null as RequestItem);
+  const [result, setResult] = useState(null as Trade.Class);
+  const [requester, setRequester] = useState(null as User.Class);
   const dbh = state.firebase.firestore();
 
   const getResult = async () => {
     return dbh
       .collection("trades")
       .doc(id)
+      .withConverter(Trade.Converter)
       .get()
-      .then((doc) => {
-        const newItem = new RequestItem(doc.data());
-        newItem.created_at = doc.data().created_at.toDate();
-        newItem.created_at.setHours;
-        return newItem;
-      })
+      .then((doc) => doc.data())
       .then((item) => {
         return dbh
           .collection("users")
-          .doc(item.requseterId)
+          .doc(item.requester_id)
+          .withConverter(User.Converter)
           .get()
           .then((userDoc) => userDoc.data())
           .then((userData) => {
-            item.requester = userData;
+            setRequester(userData);
             return item;
           });
       })
@@ -85,7 +61,7 @@ function RequestInfo({ route, navigation, state }: Props) {
   useEffect(() => {
     getResult();
   }, []);
-
+  const catchRequest = function () {};
   if (!result)
     return (
       <ScrollView
@@ -255,10 +231,12 @@ function RequestInfo({ route, navigation, state }: Props) {
             >
               의뢰자정보
             </Text>
-            <UserCard
+            <RequesterInfoArea
+              onPress={navigation.navigate("UserInfo", {
+                uid: requester.uid,
+              })}
               navigation={navigation}
-              user={result.requester}
-              uid={result.requseterId}
+              user={requester}
             />
             <Text
               style={{
@@ -293,94 +271,6 @@ function RequestInfo({ route, navigation, state }: Props) {
     );
 }
 
-function UserCard(props) {
-  return (
-    <View
-      style={{
-        flexDirection: "row",
-        alignItems: "center",
-        width: "100%",
-        backgroundColor: "white",
-        borderRadius: 5,
-        justifyContent: "center",
-        marginVertical: 10,
-        paddingVertical: 20,
-      }}
-    >
-      <View
-        style={{
-          flex: 1,
-          alignItems: "center",
-        }}
-      >
-        <MaskedView
-          style={{
-            height: 60,
-            marginHorizontal: 10,
-            width: 60,
-          }}
-          maskElement={
-            <View
-              style={{
-                borderRadius: 100,
-                backgroundColor: "gray",
-                height: 60,
-                width: 60,
-              }}
-            ></View>
-          }
-        >
-          <Image
-            style={{ height: 60, width: 60 }}
-            source={{
-              uri: "https://reactnative.dev/img/tiny_logo.png",
-            }}
-          />
-        </MaskedView>
-        <Text
-          onPress={() =>
-            props.navigation.navigate("UserInfo", { uid: props.uid })
-          }
-          style={{ fontWeight: "bold", fontSize: 16, marginTop: 5 }}
-        >
-          {props.user.nickname}
-        </Text>
-      </View>
-      <View
-        style={{
-          justifyContent: "center",
-          padding: 10,
-          flex: 2,
-          flexDirection: "row",
-        }}
-      >
-        <View style={{ justifyContent: "center", flex: 1 }}>
-          <Badges props={props} />
-          <Text>{props.user.comment}</Text>
-        </View>
-        <View style={{ justifyContent: "center", flex: 1 }}></View>
-      </View>
-    </View>
-  );
-}
-function Badges(props) {
-  return (
-    <View
-      style={{
-        backgroundColor: themeColor(6),
-        borderRadius: 5,
-        paddingHorizontal: 2,
-        paddingVertical: 2.5,
-        justifyContent: "center",
-        alignItems: "center",
-        flexDirection: "row",
-      }}
-    >
-      <FontAwesomeIcon icon={faCrown} color="white" />
-      <Text style={{ color: "white", fontWeight: "bold" }}> dada</Text>
-    </View>
-  );
-}
 function ItemInfo(props) {
   return (
     <View style={[style.tr]}>

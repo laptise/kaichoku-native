@@ -4,10 +4,11 @@ import { setToken, setUser, setMenuView, setUid } from "../../store/action";
 import { connect } from "react-redux";
 import { FontAwesome } from "@expo/vector-icons";
 import firebase from "../../firebase";
-import { Props } from "../../store/reducer";
+import { InitialState, Props } from "../../store/reducer";
 import { createStackNavigator } from "@react-navigation/stack";
-import { User, UserConverter } from "../../models/firestore";
+import * as User from "../../firebase/firestore/users";
 import Signup from "./Signup";
+import { Dispatch } from "redux";
 
 const Stack = createStackNavigator();
 
@@ -37,18 +38,10 @@ function LoginApp({ state, navigation, setMenuView, setUser }: Props) {
           .firestore()
           .collection("users")
           .doc(user.uid)
+          .withConverter(User.Converter)
           .get()
           .then((res) => res.data())
-          .then((res) => {
-            const user = new User(
-              res.comment,
-              res.countryCode,
-              res.email,
-              res.entryDate.toDate(),
-              res.nickname
-            );
-            setUser(user);
-          });
+          .then((res) => setUser(res));
       })
       .catch(function (error) {
         // Handle Errors here.
@@ -210,19 +203,19 @@ const styles = StyleSheet.create({
   },
 });
 
-function mapStateToProps(state) {
+function mapStateToProps(state: InitialState): Props {
   return { state };
 }
 
-function mapDispatchToProps(dispatch) {
+function mapDispatchToProps(dispatch: Dispatch): Props {
   return {
     setToken(status) {
       dispatch(setToken(status));
     },
-    setUser(user: User) {
+    setUser(user) {
       dispatch(setUser(user));
     },
-    setMenuView(v: boolean) {
+    setMenuView(v) {
       dispatch(setMenuView(v));
     },
     setUid(uid) {

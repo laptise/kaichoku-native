@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Button, StyleSheet, View, Animated } from "react-native";
 import { Text } from "react-native-elements";
 import { Divider } from "react-native-elements";
-import themeColor from "../dashboard/components/colors";
+import themeColor from "../../components/colors";
 function ExchangeRate() {
   const [JPYRate, SetJPYRate] = useState(0);
   const [KRWRate, SetKRWRate] = useState(0);

@@ -1,32 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View, Image } from "react-native";
-import { createStackNavigator } from "@react-navigation/stack";
-import themeColor from "../components/colors";
-import AddNewRequest from "../newRequest";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
-import RequestInfo from "../requestInfo";
-import { Button } from "react-native-elements";
+import { connect } from "react-redux";
 import countries, { Country } from "../../../data/countries";
 import MaskedView from "@react-native-community/masked-view";
 import { InitialState, Props } from "../../../store/reducer";
-class User {
-  uid: number;
-  nation: Country;
-  comment: string;
-  entryDate: Date;
-  nickname: string;
-  constructor(data) {
-    this.uid = data.uid;
-    this.nation = countries.find((country) => country.code === data.country_no);
-    this.comment = data.comment;
-    this.nickname = data.nickname;
-    this.entryDate = data.entryDate;
-  }
-}
+import * as User from "../../../firebase/firestore/users";
+
 function UserInfo({ route, navigation, state }: Props) {
   //route.params.id
-  const [user, setUser] = useState(null as User);
+  const [user, setUser] = useState(null as User.Class);
   useEffect(() => {
     state.firebase
       .firestore()
@@ -97,7 +79,7 @@ function UserInfo({ route, navigation, state }: Props) {
             {user.entryDate.getFullYear()}년 {user.entryDate.getMonth() + 1}월{" "}
             {user.entryDate.getDate()}일부터 이용함
           </Text>
-          <Text>NATION : {user.nation}</Text>
+          <Text>NATION : sfk</Text>
         </View>
         <Text
           style={{
@@ -195,6 +177,12 @@ function UserInfo({ route, navigation, state }: Props) {
   else return <View style={style.container}></View>;
 }
 
+function mapStateToProps(state: InitialState) {
+  return { state };
+}
+
+const AppContainer = connect(mapStateToProps)(UserInfo);
+
 const style = StyleSheet.create({
   th: {
     padding: 10,
@@ -219,4 +207,4 @@ const style = StyleSheet.create({
   },
 });
 
-export default UserInfo;
+export default AppContainer;

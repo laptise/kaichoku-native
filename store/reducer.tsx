@@ -1,5 +1,5 @@
 import * as firebase from "firebase";
-
+import { Class as User } from "../firebase/firestore/users";
 export interface InitialState {
   uid: string;
   price: number;
@@ -23,12 +23,14 @@ export interface Props {
   navigation?: any;
   state?: InitialState;
   route?: any;
-  setToken?: Function;
-  setMenuView?: Function;
-  setUser?: Function;
-  setFirebase?: Function;
-  setUid?: Function;
-  postLogin?: Function;
+  user?: User;
+  setToken?: (token: string) => void;
+  setMenuView?: (boolean: boolean) => void;
+  setUser?: (user: User) => void;
+  setFirebase?: (firebase) => void;
+  setUid?: (uid: string) => void;
+  postLogin?: (token: string) => void;
+  setDbh?: (db: typeof firebase.firestore) => void;
 }
 
 export default function appReducer(state = initialState, action) {

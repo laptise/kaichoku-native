@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import themeColor from "../dashboard/components/colors";
+import themeColor from "../../components/colors";
 import { logOut, setMenuView, setUser } from "../../store/action";
 import { StyleSheet, View, Animated } from "react-native";
 import { Divider, Text, Button } from "react-native-elements";

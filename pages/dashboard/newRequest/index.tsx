@@ -10,13 +10,13 @@ import {
 } from "react-native";
 import { connect } from "react-redux";
 import { Button, Text } from "react-native-elements";
-import themeColor from "../components/colors";
+import themeColor from "../../../components/colors";
 import {
   categories,
   majorCategories,
   middleCategories,
 } from "../../../data/categories";
-import { Trade, TradeConverter } from "../../../models/firestore";
+import * as Trade from "../../../firebase/firestore/trades";
 import * as ImagePicker from "expo-image-picker";
 import Constants from "expo-constants";
 interface FormData {
@@ -24,6 +24,7 @@ interface FormData {
   productName: string;
   purchasePlace: string;
   price: number;
+  fee: number;
 }
 
 function AddNewRequest({ navigation, route, state }: Props) {
@@ -32,6 +33,7 @@ function AddNewRequest({ navigation, route, state }: Props) {
   const [purchasePlace, setPurchasePlace] = useState(null);
   const [requestTitle, setRequestTitle] = useState(null);
   const [price, setPrice] = useState(null);
+  const [fee, setFee] = useState(null);
   const firebase = state.firebase;
   const db = firebase.firestore();
   const auth = firebase.auth();
@@ -40,6 +42,7 @@ function AddNewRequest({ navigation, route, state }: Props) {
     productName,
     purchasePlace,
     price,
+    fee,
   };
   useEffect(() => {
     (async () => {
@@ -67,22 +70,35 @@ function AddNewRequest({ navigation, route, state }: Props) {
     }
   };
   const add = () => {
+    /**delete All */
+    // db.collection("trades")
+    //   .get()
+    //   .then((docs) =>
+    //     docs.forEach((doc) => {
+    //       doc.ref.delete();
+    //     })
+    //   );
+    /**add To DB */
     db.collection("trades")
-      .withConverter(TradeConverter)
-      .add(
-        new Trade(
-          formData.productName,
-          formData.purchasePlace,
-          100,
-          100,
-          formData.requestTitle,
-          new Date(),
-          auth.currentUser.uid,
-          "d"
-        )
-      )
-      .then(() => true);
-    navigation.goBack();
+      .add({})
+      .then((doc) =>
+        doc
+          .withConverter(Trade.Converter)
+          .set(
+            new Trade.Class(
+              doc.id,
+              formData.productName,
+              formData.purchasePlace,
+              Number(formData.price),
+              Number(formData.fee),
+              formData.requestTitle,
+              new Date(),
+              auth.currentUser.uid,
+              false
+            )
+          )
+      );
+    // navigation.goBack();
   };
   return (
     <ScrollView>

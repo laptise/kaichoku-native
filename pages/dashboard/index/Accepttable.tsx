@@ -7,7 +7,7 @@ import {
   faPlane,
 } from "@fortawesome/free-solid-svg-icons";
 import { Button, Divider, Text } from "react-native-elements";
-import themeColor from "../components/colors";
+import themeColor from "../../../components/colors";
 import Axios from "axios";
 import { LinearGradient } from "expo-linear-gradient";
 import { TextInput } from "react-native-gesture-handler";

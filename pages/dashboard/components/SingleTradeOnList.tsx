@@ -2,10 +2,10 @@ import React, { useEffect, useState } from "react";
 import { StyleSheet, View, Animated } from "react-native";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Button, Divider, Text } from "react-native-elements";
-import { Trade } from "../../../models/firestore";
-import themeColor from "./colors";
+import * as Trade from "../../../firebase/firestore/trades";
+import themeColor from "../../../components/colors";
 interface Props {
-  trade: Trade;
+  trade: Trade.Class;
   onPress: () => void;
 }
 export default function SingleTradeOnList({ trade, onPress }: Props) {
