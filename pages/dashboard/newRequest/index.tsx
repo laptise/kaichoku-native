@@ -7,7 +7,11 @@ import {
   TextInput,
   ScrollView,
   Platform,
+  Image,
+  Alert,
 } from "react-native";
+import Swiper from "react-native-swiper";
+import * as ImageManipulator from "expo-image-manipulator";
 import { connect } from "react-redux";
 import { Button, Text } from "react-native-elements";
 import themeColor from "../../../components/colors";
@@ -19,6 +23,7 @@ import {
 import * as Trade from "../../../firebase/firestore/trades";
 import * as ImagePicker from "expo-image-picker";
 import Constants from "expo-constants";
+import { stat } from "fs";
 interface FormData {
   requestTitle: string;
   productName: string;
@@ -28,15 +33,17 @@ interface FormData {
 }
 
 function AddNewRequest({ navigation, route, state }: Props) {
-  const [image, setImage] = useState(null);
+  const [images, setImages] = useState([]);
   const [productName, setProductName] = useState(null);
   const [purchasePlace, setPurchasePlace] = useState(null);
   const [requestTitle, setRequestTitle] = useState(null);
   const [price, setPrice] = useState(null);
   const [fee, setFee] = useState(null);
+  const [blob, setBlob] = useState(null);
   const firebase = state.firebase;
   const db = firebase.firestore();
   const auth = firebase.auth();
+  const [loading, setLoading] = useState(null);
   const formData: FormData = {
     requestTitle,
     productName,
@@ -58,18 +65,45 @@ function AddNewRequest({ navigation, route, state }: Props) {
   }, []);
 
   const pickImage = async () => {
-    let result: any = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
+    const result: any = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
     });
-
     if (!result.cancelled) {
-      setImage(result.uri);
+      const newImages = images.concat();
+      const actions = [];
+      actions.push({ resize: { width: 350 } });
+      const manipulatorResult = await ImageManipulator.manipulateAsync(
+        result.uri,
+        actions,
+        {
+          compress: 0.4,
+        }
+      );
+      newImages.push(manipulatorResult.uri);
+      setImages(newImages);
     }
   };
-  const add = () => {
+  const imgUpload = async (docId: string) => {
+    console.log(114);
+    const metadata = {
+      contentType: "image/jpeg",
+    };
+    let uris: string[] = [];
+    await Promise.all(
+      images.map(async (image, index) => {
+        const response = await fetch(image);
+        const blob = await response.blob();
+        const storage = firebase.storage();
+        const tradesRef = storage.ref("trades");
+        const tradeRef = tradesRef.child(`${docId}/${index}`);
+        await tradeRef.put(blob, metadata).catch(console.log);
+        uris.push((await tradeRef.getDownloadURL()) as string);
+      })
+    );
+    return uris;
+  };
+  const add = async () => {
     /**delete All */
     // db.collection("trades")
     //   .get()
@@ -77,28 +111,40 @@ function AddNewRequest({ navigation, route, state }: Props) {
     //     docs.forEach((doc) => {
     //       doc.ref.delete();
     //     })
-    //   );
+    //   );5
     /**add To DB */
-    db.collection("trades")
+    const docAndImages = await db
+      .collection("trades")
       .add({})
-      .then((doc) =>
-        doc
-          .withConverter(Trade.Converter)
-          .set(
-            new Trade.Class(
-              doc.id,
-              formData.productName,
-              formData.purchasePlace,
-              Number(formData.price),
-              Number(formData.fee),
-              formData.requestTitle,
-              new Date(),
-              auth.currentUser.uid,
-              false
-            )
-          )
+      .then(async (doc) => {
+        const urls = await imgUpload(doc.id);
+        return { doc, urls };
+      });
+    const uploadedTrade = await docAndImages.doc
+      .withConverter(Trade.Converter)
+      .set(
+        new Trade.Class(
+          docAndImages.doc.id,
+          formData.productName,
+          formData.purchasePlace,
+          Number(formData.price),
+          Number(formData.fee),
+          formData.requestTitle,
+          new Date(),
+          auth.currentUser.uid,
+          null,
+          docAndImages.urls || []
+        )
       );
-    // navigation.goBack();
+    Alert.alert(
+      "등록완료",
+      "새로운 의뢰를 추가했습니다\n내 거래에서 확인하실 수 있습니다."
+    );
+    navigation.goBack();
+    navigation.navigate("RequestInfo", {
+      id: docAndImages.doc.id,
+      type: "requesting",
+    });
   };
   return (
     <ScrollView>
@@ -150,9 +196,35 @@ function AddNewRequest({ navigation, route, state }: Props) {
           />
         </View>
         {/* <CategorySelector /> */}
+        <Swiper
+          style={style.slider}
+          showsButtons={false}
+          showsPagination={false}
+        >
+          {(images.length > 0 &&
+            images.map((image, index) => (
+              <View key={index} style={style.slide1}>
+                <Image
+                  key={index}
+                  style={{ width: "100%", height: "100%" }}
+                  source={{ uri: image }}
+                />
+                <TextInput />
+              </View>
+            ))) || (
+            <View style={style.slide1}>
+              <Text>please add!</Text>
+            </View>
+          )}
+        </Swiper>
         <Button
           onPress={pickImage}
           title="사진추가"
+          style={{ marginBottom: 10 }}
+        />
+        <Button
+          onPress={() => setImages([])}
+          title="reset"
           style={{ marginBottom: 10 }}
         />
         <Button onPress={add} title="추가"></Button>
@@ -174,6 +246,23 @@ const AppContainer = connect(
   mapDispatchToProps
 )(AddNewRequest);
 
+const style = StyleSheet.create({
+  slider: {
+    height: 300,
+    marginVertical: 10,
+  },
+  slide1: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#9DD6EB",
+  },
+  text: {
+    color: "#fff",
+    fontSize: 30,
+    fontWeight: "bold",
+  },
+});
 const css = StyleSheet.create({
   categorySelector: {
     flexDirection: "row",

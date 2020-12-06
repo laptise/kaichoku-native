@@ -24,31 +24,23 @@ function LoginApp({ state, navigation, setMenuView, setUser }: Props) {
     email: email ? "flex" : "none",
     password: password ? "flex" : "none",
   };
-  const submit = () => {
+  const submit = async () => {
     if (!email || !password) {
       Alert.alert("로그인 실패", "이메일과 패스워드는 필수입력 항목입니다!");
       return false;
     }
-    state.firebase
+    const userCredential = await state.firebase
       .auth()
-      .signInWithEmailAndPassword(email, password)
-      .then((res) => res.user as firebase.User)
-      .then((user) => {
-        return (state.firebase as typeof firebase)
-          .firestore()
-          .collection("users")
-          .doc(user.uid)
-          .withConverter(User.Converter)
-          .get()
-          .then((res) => res.data())
-          .then((res) => setUser(res));
-      })
-      .catch(function (error) {
-        // Handle Errors here.
-        var errorCode = error.code;
-        var errorMessage = error.message;
-        // ...
-      });
+      .signInWithEmailAndPassword(email, password);
+    const user = userCredential.user;
+    const userData = await state.firebase
+      .firestore()
+      .collection("users")
+      .doc(user.uid)
+      .withConverter(User.Converter)
+      .get()
+      .then((res) => res.data());
+    setUser(userData);
   };
   useEffect(() => {
     setMenuView(true);
@@ -103,7 +95,7 @@ function LoginApp({ state, navigation, setMenuView, setUser }: Props) {
               ]}
               color="rgba(0,0,0,.8)"
               size={24}
-              onPress={() => submit()}
+              onPress={() => submit().catch(console.log)}
               name="sign-in"
             >
               <Text

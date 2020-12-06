@@ -5,10 +5,9 @@ import { connect, Provider } from "react-redux";
 import { SafeAreaView, StyleSheet, Text, View } from "react-native";
 import { setMenuView, setDbh, setFirebase, setUser } from "./store/action";
 import reducer, { Props } from "./store/reducer";
-import Menu from "./pages/partial/Menu";
 import Header from "./pages/partial/Header";
 import Blocker from "./pages/login";
-import Setting from "./pages/menus/Menu";
+import Menu from "./pages/menus";
 import Home from "./pages/home/Home";
 import { InitialState, NavigationContainer } from "@react-navigation/native";
 import TradeIndex from "./pages/dashboard/index";
@@ -29,11 +28,11 @@ function App({ state, setFirebase }: Props) {
   }, []);
   return (
     <>
+      <StatusBar style={"dark"} />
       <NavigationContainer>
         {state.user ? (
           <>
             <Header />
-            <Menu />
             <Tab.Navigator
               initialRouteName="메뉴"
               screenOptions={({ route }) => ({
@@ -60,7 +59,7 @@ function App({ state, setFirebase }: Props) {
             >
               <Tab.Screen name="대시보드" component={TradeIndex} />
               <Tab.Screen name="홈" component={Home} />
-              <Tab.Screen name="메뉴" component={Setting} />
+              <Tab.Screen name="메뉴" component={Menu} />
             </Tab.Navigator>
           </>
         ) : (

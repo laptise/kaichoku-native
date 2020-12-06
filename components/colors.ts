@@ -1,4 +1,4 @@
-export default function themeColor(index, opacity?) {
+export default function themeColor(index: number, opacity?: number) {
   const colors = [
     "235, 97, 56",
     "241, 142, 29",

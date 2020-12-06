@@ -2,50 +2,54 @@ import React, { useEffect, useState, useCallback } from "react";
 import { StyleSheet, Text, View, Animated, RefreshControl } from "react-native";
 import { connect } from "react-redux";
 import themeColor from "../../../components/colors";
-import Accepttable from "./Accepttable";
-import MyRequest from "./MyRequest";
-import Requset from "./Request";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { Button } from "react-native-elements";
 import { InitialState, Props } from "../../../store/reducer";
 import { ScrollView } from "react-native-gesture-handler";
+import TradeList from "./TradeList";
+import * as Trade from "../../../firebase/firestore/trades";
 
 function TradesMain({ navigation, state }: Props) {
-  const [AcceptableList, setAcceptableList] = useState([]);
-  const [TradingsList, setTradingsList] = useState([]);
-  const [RequestingList, setRequestingList] = useState([]);
+  const [AcceptableList, setAcceptableList] = useState([] as Trade.Class[]);
+  const [catchedList, setCatchedList] = useState([] as Trade.Class[]);
+  const [TradingsList, setTradingsList] = useState([] as Trade.Class[]);
+  const [RequestingList, setRequestingList] = useState([] as Trade.Class[]);
   const [refreshing, setRefreshing] = useState(false);
   const auth = state.firebase && state.firebase.auth();
   const db = state.firebase.firestore();
   const load = async () => {
+    setRequestingList([]);
+    setCatchedList([]);
     setAcceptableList([]);
-    setTradingsList([]);
-    return db
+    const currentUser = auth.currentUser;
+    const allRequests = await db
       .collection("trades")
+      .withConverter(Trade.Converter)
       .get()
-      .then((res) =>
-        res.docs.map((item) => {
-          const result = item.data();
-          result.id = item.id;
-          result.created_at = result.created_at.toDate();
-          return result;
-        })
-      )
+      .then((res) => res.docs.map((item) => item.data()))
       .then((arr) => {
-        const myList = arr.filter(
-          (item) => item["requester_id"] === auth.currentUser.uid
-        );
-        const others = arr.filter(
-          (item) => item["requester_id"] !== auth.currentUser.uid
-        );
-        setAcceptableList(others);
-        setRequestingList(myList);
-        return AcceptableList;
+        return arr;
       });
+    const myRequest = allRequests.filter(
+      (item) => !item.catcher && item.requester_id === currentUser.uid
+    );
+    const catchedRequest = allRequests.filter(
+      (item) =>
+        item.catcher &&
+        (item.catcher === currentUser.uid ||
+          item.requester_id === currentUser.uid)
+    );
+    const acceptableList = allRequests.filter(
+      (item) =>
+        item.catcher !== currentUser.uid &&
+        item.requester_id !== currentUser.uid
+    );
+    setRequestingList(myRequest);
+    setCatchedList(catchedRequest);
+    setAcceptableList(acceptableList);
   };
   useEffect(() => {
-    db.collection("trades").onSnapshot(() => load());
     load();
   }, []);
   const onRefresh = useCallback(() => {
@@ -60,17 +64,43 @@ function TradesMain({ navigation, state }: Props) {
         }
       >
         <View style={{ flex: 1 }}>
-          <Requset />
-          {RequestingList.length > 0 && (
-            <MyRequest
+          {catchedList.length > 0 && (
+            <TradeList
+              title="진행중인 거래"
               navigation={navigation}
-              acceptableList={RequestingList}
+              trades={catchedList}
+              tradeType="catched"
+              statusMessage={[
+                "수락된 거래가 없습니다!",
+                "거래가 진행중입니다. 틈틈히 확인해주세요!",
+              ]}
+              themeColor={themeColor(6, 0.7)}
+            />
+          )}
+          {RequestingList.length > 0 && (
+            <TradeList
+              title="의뢰중인 거래"
+              navigation={navigation}
+              trades={RequestingList}
+              tradeType="requesting"
+              statusMessage={[
+                "아직 의뢰중인 거래는 없습니다! ",
+                "의뢰중인 거래입니다. 누군가 의뢰를 받아줄때까지 잠시만 기다려주세요.",
+              ]}
+              themeColor={themeColor(1, 0.7)}
             />
           )}
           {AcceptableList.length > 0 && (
-            <Accepttable
+            <TradeList
+              title="수락가능한 거래"
               navigation={navigation}
-              acceptableList={AcceptableList}
+              trades={AcceptableList}
+              tradeType="acceptable"
+              statusMessage={[
+                "현재 수락가능한 거래가 없습니다. 나중에 다시 확인해주세요.",
+                "수락가능한 거래입니다. 거래를 수락해염",
+              ]}
+              themeColor={themeColor(7, 0.7)}
             />
           )}
         </View>

@@ -1,3 +1,4 @@
+class LikedPeoples {}
 class Trade {
   name: string;
   place: string;
@@ -7,7 +8,8 @@ class Trade {
   created_at: Date;
   requester_id: string;
   id: string;
-  catched: boolean;
+  catcher: string;
+  images?: string[];
   constructor(
     id: string,
     name: string,
@@ -17,8 +19,10 @@ class Trade {
     title: string,
     created_at: Date,
     requester_id: string,
-    catched: boolean
+    catcher: string,
+    images: string[]
   ) {
+    this.id = id;
     this.name = name;
     this.place = place;
     this.price = price;
@@ -26,13 +30,14 @@ class Trade {
     this.title = title;
     this.created_at = created_at;
     this.requester_id = requester_id;
-    this.id = id;
-    this.catched = catched;
+    this.catcher = catcher;
+    this.images = images;
   }
 }
 const Converter = {
   toFirestore: function (trade: Trade) {
     return {
+      id: trade.id,
       name: trade.name,
       place: trade.place,
       price: trade.price,
@@ -40,8 +45,8 @@ const Converter = {
       title: trade.title,
       created_at: trade.created_at,
       requester_id: trade.requester_id,
-      id: trade.id,
-      catched: trade.catched,
+      catcher: trade.catcher,
+      images: trade.images,
     };
   },
   fromFirestore: function (
@@ -56,9 +61,10 @@ const Converter = {
       data.price,
       data.fee,
       data.title,
-      data.created_at.toDate() as Date,
+      data.created_at.toDate(),
       data.requester_id,
-      data.catched
+      data.catcher,
+      data.images
     );
   },
 };

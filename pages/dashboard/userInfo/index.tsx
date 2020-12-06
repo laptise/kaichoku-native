@@ -9,23 +9,26 @@ function UserInfo({ route, state }: Props) {
   //route.params.id
   const [user, setUser] = useState(null as User.Class);
   const [country, setCountry] = useState(null as Country.Class);
-  useEffect(() => {
-    state.firebase
+  const getUser = async (uid: string) => {
+    const user = await state.firebase
       .firestore()
       .collection("users")
-      .doc(route.params.uid)
+      .doc(uid)
       .withConverter(User.Converter)
       .get()
-      .then((res) => setUser(res.data()))
-      .then(() =>
-        state.firebase
-          .firestore()
-          .collection("countries")
-          .doc(String(user.countryCode))
-          .withConverter(Country.Converter)
-          .get()
-          .then((res) => setCountry(res.data()))
-      );
+      .then((res) => res.data());
+    const country = await state.firebase
+      .firestore()
+      .collection("countries")
+      .doc(String(user.countryCode))
+      .withConverter(Country.Converter)
+      .get()
+      .then((res) => res.data());
+    setUser(user);
+    setCountry(country);
+  };
+  useEffect(() => {
+    route.params.uid && getUser(route.params.uid);
   }, []);
   if (user && country)
     return (

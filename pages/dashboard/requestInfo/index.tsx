@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, View, Image, RefreshControl } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  RefreshControl,
+  ActivityIndicator,
+} from "react-native";
 import { Divider, Button } from "react-native-elements";
 import { connect } from "react-redux";
 import themeColor from "../../../components/colors";
@@ -12,56 +19,42 @@ import { InitialState, Props } from "../../../store/reducer";
 import * as Trade from "../../../firebase/firestore/trades";
 import * as User from "../../../firebase/firestore/users";
 import RequesterInfoArea from "./components/RequesterInfoArea";
-const images = [
-  {
-    // Simplest usage.
-    url: "https://avatars2.githubusercontent.com/u/7970947?v=3&s=460",
 
-    // width: number
-    // height: number
-    // Optional, if you know the image size, you can set the optimization performance
-
-    // You can pass props to <Image />.
-    props: {
-      // headers: ...
-    },
-  },
-];
 function RequestInfo({ route, navigation, state }: Props) {
   const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(false);
   const { id } = route.params;
+  const questType: "acceptable" | "requesting" | "catched" =
+    route.params && route.params.type;
   const [result, setResult] = useState(null as Trade.Class);
   const [requester, setRequester] = useState(null as User.Class);
   const dbh = state.firebase.firestore();
 
+  const catchRequest = async () => {
+    const userId = state.firebase.auth().currentUser.uid;
+    const docRef = dbh.collection("trades").doc(id);
+    await docRef.update({ catcher: userId });
+    console.log("done");
+  };
   const getResult = async () => {
-    return dbh
+    const TradeData = await dbh
       .collection("trades")
       .doc(id)
       .withConverter(Trade.Converter)
       .get()
-      .then((doc) => doc.data())
-      .then((item) => {
-        return dbh
-          .collection("users")
-          .doc(item.requester_id)
-          .withConverter(User.Converter)
-          .get()
-          .then((userDoc) => userDoc.data())
-          .then((userData) => {
-            setRequester(userData);
-            return item;
-          });
-      })
-      .then((item) => {
-        setResult(item);
-        return result;
-      });
+      .then((doc) => doc.data());
+    const UserData = await dbh
+      .collection("users")
+      .doc(TradeData.requester_id)
+      .withConverter(User.Converter)
+      .get()
+      .then((userDoc) => userDoc.data());
+    setRequester(UserData);
+    setResult(TradeData);
   };
   useEffect(() => {
     getResult();
   }, []);
-  const catchRequest = function () {};
   if (!result)
     return (
       <ScrollView
@@ -76,7 +69,7 @@ function RequestInfo({ route, navigation, state }: Props) {
     );
   else
     return (
-      <ScrollView>
+      <ScrollView contentContainerStyle={{ justifyContent: "flex-start" }}>
         <View style={style.wrapper}>
           <View style={style.info}>
             <View
@@ -116,21 +109,36 @@ function RequestInfo({ route, navigation, state }: Props) {
             >
               사진
             </Text>
-            <Swiper
-              style={style.slider}
-              showsButtons={false}
-              showsPagination={false}
-            >
-              <View style={style.slide1}>
-                <Text style={style.text}>사진 1</Text>
-              </View>
-              <View style={style.slide2}>
-                <Text style={style.text}>사진 2</Text>
-              </View>
-              <View style={style.slide3}>
-                <Text style={style.text}>사진 3</Text>
-              </View>
-            </Swiper>
+            <Text>{loading}</Text>
+            {result.images && result.images.length > 0 && (
+              <Swiper
+                style={style.slider}
+                showsButtons={false}
+                showsPagination={false}
+              >
+                {result.images.map((url, index) => (
+                  <View style={{ position: "relative" }}>
+                    <Image
+                      onLoadStart={() => setLoading(true)}
+                      onLoadEnd={() => setLoading(false)}
+                      key={index}
+                      style={{ width: "100%", height: "100%" }}
+                      source={{ uri: url }}
+                    />
+                    {loading && (
+                      <ActivityIndicator
+                        size="large"
+                        style={{
+                          position: "absolute",
+                          alignSelf: "center",
+                          top: "48%",
+                        }}
+                      />
+                    )}
+                  </View>
+                ))}
+              </Swiper>
+            )}
             <Text
               style={{
                 alignSelf: "flex-start",
@@ -172,7 +180,7 @@ function RequestInfo({ route, navigation, state }: Props) {
                   <Text>정가</Text>
                 </View>
                 <View style={style.td}>
-                  <Text>7,200</Text>
+                  <Text>{result.price.toLocaleString()}</Text>
                 </View>
               </View>
             </View>
@@ -217,7 +225,7 @@ function RequestInfo({ route, navigation, state }: Props) {
                   <Text>수수료</Text>
                 </View>
                 <View style={style.td}>
-                  <Text>{result.fee}</Text>
+                  <Text>{result.fee.toLocaleString()}</Text>
                 </View>
               </View>
             </View>
@@ -261,12 +269,24 @@ function RequestInfo({ route, navigation, state }: Props) {
             >
               <Text>제발사다주세요 ㅇㅁㅇㅁㅇㅁ</Text>
             </View>
-            <Button
-              raised
-              containerStyle={{ marginVertical: 20 }}
-              buttonStyle={{ backgroundColor: themeColor(1, 0.8) }}
-              title="의뢰 받기"
-            ></Button>
+            {questType === "acceptable" && (
+              <Button
+                raised
+                onPress={catchRequest}
+                containerStyle={{ marginVertical: 20 }}
+                buttonStyle={{ backgroundColor: themeColor(1, 0.8) }}
+                title="의뢰 받기"
+              />
+            )}
+            {questType === "requesting" && (
+              <Button
+                raised
+                onPress={catchRequest}
+                containerStyle={{ marginVertical: 20 }}
+                buttonStyle={{ backgroundColor: themeColor(1, 0.8) }}
+                title="의뢰 관리"
+              />
+            )}
           </View>
         </View>
       </ScrollView>
@@ -294,12 +314,11 @@ const style = StyleSheet.create({
   },
   info: {
     borderRadius: 10,
-    padding: 20,
+    paddingHorizontal: 20,
     width: "100%",
     alignItems: "center",
   },
   wrapper: {
-    height: "100%",
     flex: 1,
     alignItems: "center",
   },

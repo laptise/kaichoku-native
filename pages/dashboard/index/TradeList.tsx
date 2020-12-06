@@ -1,47 +1,64 @@
 import React, { useEffect, useState } from "react";
 import { StyleSheet, View, Animated } from "react-native";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import {
-  faBars,
-  faChevronRight,
-  faPlane,
-} from "@fortawesome/free-solid-svg-icons";
 import { Button, Divider, Text } from "react-native-elements";
 import themeColor from "../../../components/colors";
-import Axios from "axios";
-import { LinearGradient } from "expo-linear-gradient";
-import { TextInput } from "react-native-gesture-handler";
 import SingleTradeOnList from "../components/SingleTradeOnList";
-function Accept({ navigation, acceptableList }) {
-  const [questList, setQuestList] = useState(null);
+import * as Trade from "../../../firebase/firestore/trades";
+import { Props } from "../../../store/reducer";
+
+interface NewProps extends Props {
+  trades: Trade.Class[];
+  tradeType?: "acceptable" | "requesting" | "catched";
+  title: string;
+  /**[label when not exist,label when exist]*/
+  statusMessage: [string, string];
+  themeColor: string;
+}
+function TradeList({
+  navigation,
+  trades,
+  tradeType,
+  title,
+  statusMessage,
+  themeColor,
+}: NewProps) {
+  const [questList, setQuestList] = useState([] as Trade.Class[]);
   const getQuestList = () => {
-    setQuestList(acceptableList);
+    setQuestList(trades);
     //setQuestList(res.data);
   };
-
   useEffect(() => {
     getQuestList();
   }, []);
   return (
     <View style={[style.body, { marginTop: 5 }]}>
-      <Text style={[style.title, style.inner]}>수락가능한 거래</Text>
+      <Text style={[style.title, style.inner]}>{title}</Text>
       <Divider
         style={[
           style.inner,
           {
             height: 1.5,
             width: "80%",
-            backgroundColor: themeColor(1, 0.7),
+            backgroundColor: themeColor,
           },
         ]}
       />
-      <Text style={[style.inner]}>의뢰를 수락하여 판매를 시작해보세요!</Text>
+      <Text style={[style.inner]}>
+        {trades.length === 0 ? statusMessage[0] : statusMessage[1]}
+      </Text>
+
       {questList &&
-        questList.map((quest) => (
+        questList.map((quest: Trade.Class) => (
           <SingleTradeOnList
             trade={quest}
+            themeColor={themeColor}
             key={quest.id}
-            onPress={() => navigation.navigate("RequestInfo", { id: quest.id })}
+            onPress={() =>
+              navigation.navigate("RequestInfo", {
+                id: quest.id,
+                type: tradeType,
+              })
+            }
           />
         ))}
     </View>
@@ -71,4 +88,4 @@ const style = StyleSheet.create({
     fontSize: 20,
   },
 });
-export default Accept;
+export default TradeList;
