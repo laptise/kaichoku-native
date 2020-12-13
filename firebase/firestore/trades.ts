@@ -30,6 +30,8 @@ class Trade {
   catcher: string;
   images: string[];
   messages: Message[];
+  requesterUnread: number;
+  catcherUnread: number;
   constructor(
     id: string,
     name: string,
@@ -41,7 +43,9 @@ class Trade {
     requester_id: string,
     catcher: string,
     images: string[],
-    messages?: Message[]
+    messages?: Message[],
+    requesterUnread?: number,
+    catcherUnread?: number
   ) {
     this.id = id;
     this.name = name;
@@ -54,6 +58,8 @@ class Trade {
     this.catcher = catcher;
     this.images = images;
     this.messages = messages;
+    this.requesterUnread = requesterUnread;
+    this.catcherUnread = catcherUnread;
   }
 }
 const Converter = {
@@ -69,6 +75,8 @@ const Converter = {
       requester_id: trade.requester_id,
       catcher: trade.catcher,
       images: trade.images,
+      catcherUnread: trade.catcherUnread,
+      requesterUnread: trade.catcherUnread,
     };
   },
   fromFirestore: function (
@@ -87,7 +95,9 @@ const Converter = {
       data.requester_id,
       data.catcher,
       data.images,
-      data.messages
+      data.messages,
+      data.requesterUndrea,
+      data.catcherUnread
     );
   },
 };

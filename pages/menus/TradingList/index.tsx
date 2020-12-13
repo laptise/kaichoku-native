@@ -24,27 +24,30 @@ function TradingList({ state, route, navigation }: Props) {
   const textSet =
     route.params.type === "sell" ? textSetList[0] : textSetList[1];
   const [trades, setTrades] = useState([] as Trade.Class[]);
+  const [counts, setCounts] = useState(0);
   const firebase = state.firebase;
   const firestore = firebase.firestore();
   const auth = firebase.auth();
   const tradeIds: string[] = route.params.tradeIds;
+  const singleRequestData = async (tradeId: string) => {
+    const tradeRef = firestore
+      .collection("trades")
+      .withConverter(Trade.Converter)
+      .doc(tradeId);
+    const trade = await tradeRef.get().then((doc) => doc.data());
+    return trade;
+  };
   const getTrades = async () => {
     setTrades([]);
     const trades = await Promise.all(
       tradeIds.map(async (tradeId) => {
-        const tradeRef = firestore
-          .collection("trades")
-          .withConverter(Trade.Converter)
-          .doc(tradeId);
-        const trade = await tradeRef.get().then((doc) => doc.data());
-        const messages = await tradeRef
-          .collection("messages")
-          .get()
-          .then((snapshot) => snapshot.docs.map((doc) => doc.data()));
-        trade["unreadMessages"] = messages.filter(
-          (msg) => !msg.viewd.includes(auth.currentUser.uid)
-        ).length;
-        console.log(trade);
+        const trade = await singleRequestData(tradeId);
+
+        const counts =
+          auth.currentUser.uid === trade.catcher
+            ? trade.catcherUnread
+            : trade.requesterUnread;
+        setCounts(counts);
         return trade;
       })
     );
@@ -68,7 +71,7 @@ function TradingList({ state, route, navigation }: Props) {
                 }
               >
                 <FontAwesomeIcon icon={faCommentDots} size={18} />
-                {trade["unreadMessages"] > 0 && (
+                {counts > 0 && (
                   <View style={style.unreadMessages}>
                     <Text
                       style={{
@@ -78,7 +81,7 @@ function TradingList({ state, route, navigation }: Props) {
                         textAlign: "center",
                       }}
                     >
-                      {trade["unreadMessages"]}
+                      {counts}
                     </Text>
                   </View>
                 )}

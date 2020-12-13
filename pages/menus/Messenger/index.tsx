@@ -14,6 +14,7 @@ import { connect } from "react-redux";
 import { ScrollView } from "react-native-gesture-handler";
 import { GiftedChat, Bubble } from "react-native-gifted-chat";
 import * as User from "../../../firebase/firestore/users";
+import * as Trade from "../../../firebase/firestore/trades";
 import "dayjs/locale/ko";
 function Header() {
   return (
@@ -45,6 +46,7 @@ const renderBubble = (props) => {
 function Messenger({ state, route }: Props) {
   const [messages, setMessages] = useState([]);
   const [user, setUser] = useState(null as User.Class);
+  const [isCatcher, setIsCatcher] = useState(null);
   const firestore = state.firebase.firestore();
   const auth = state.firebase.auth();
   const tradeId = route.params.tradeId;
@@ -52,14 +54,31 @@ function Messenger({ state, route }: Props) {
     .collection("trades")
     .doc(tradeId)
     .collection("messages");
-  console.log(tradeId);
+  const tradeRef = firestore.collection("trades").doc(tradeId);
   const onSend = async (newMessages = []) => {
-    console.log(newMessages);
+    if (isCatcher)
+      tradeRef.update({
+        requesterUnread: state.firebase.firestore.FieldValue.increment(1),
+      });
+    else
+      tradeRef.update({
+        catcherUnread: state.firebase.firestore.FieldValue.increment(1),
+      });
     newMessages.forEach(async (newMessage) => {
       await currentMessageRef
         .doc(String(10000000000000 - new Date().valueOf()))
         .set(newMessage);
     });
+  };
+  const recogCatcher = async () => {
+    await tradeRef
+      .withConverter(Trade.Converter)
+      .get()
+      .then((doc) => {
+        const res = doc.data();
+        if (res.catcher === auth.currentUser.uid) setIsCatcher(true);
+        else setIsCatcher(false);
+      });
   };
   const getUser = async () => {
     const user = await firestore
@@ -71,14 +90,13 @@ function Messenger({ state, route }: Props) {
     setUser(user);
   };
   useEffect(() => {
+    recogCatcher();
     getUser();
     currentMessageRef.onSnapshot((snapshot) => {
       const messages = snapshot.docs.map((doc) => {
-        doc.ref.update({
-          viewd: state.firebase.firestore.FieldValue.arrayUnion(
-            auth.currentUser.uid
-          ),
-        });
+        if (isCatcher) {
+          tradeRef.update({ catcherUnread: 0 });
+        } else tradeRef.update({ requesterUnread: 0 });
         const singleResut = doc.data();
         singleResut.createdAt = singleResut.createdAt.toDate();
         return singleResut;
