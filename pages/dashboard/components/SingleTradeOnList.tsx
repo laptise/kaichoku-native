@@ -37,6 +37,7 @@ export default function SingleTradeOnList({
     innerBagde: {
       backgroundColor: "red",
       borderRadius: 5,
+      alignItems: "center",
     },
     smallInner: {
       fontSize: 13,
@@ -45,14 +46,12 @@ export default function SingleTradeOnList({
       paddingVertical: 4,
       paddingHorizontal: 3,
       color: themeColor,
-      fontWeight: "bold",
     },
     title: {
-      fontSize: 16,
-      color: "black",
+      fontSize: 15,
+      color: themeColor,
       alignItems: "center",
       padding: 5,
-      fontWeight: "bold",
     },
   });
 
@@ -69,6 +68,7 @@ export default function SingleTradeOnList({
                 marginLeft: "auto",
                 flexDirection: "row",
                 marginTop: 5,
+                alignItems: "center",
                 height: "110%",
               }}
             >

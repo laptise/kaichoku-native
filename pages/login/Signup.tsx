@@ -17,6 +17,7 @@ function Singup({ navigation, state }: Props) {
   const [email, setEmail] = useState(null);
   const [nickname, setNickname] = useState(null);
   const [password, setPassword] = useState(null);
+  const [passwordCheck, setPasswordCheck] = useState(null);
   const [countryNameInput, setCountryNameInput] = useState(null as string);
   const [country, setCountry] = useState(null as Country);
   const form = {
@@ -24,6 +25,28 @@ function Singup({ navigation, state }: Props) {
     nickname,
     country,
     password,
+  };
+  const validation = (target: string, value: string) => {
+    console.log(value);
+    const pwRegex = RegExp(/^(?=.*?[a-z])(?=.*?\d)[a-z\d]{8,100}$/i);
+    const emailRegex = RegExp(
+      /^[A-Za-z0-9]{1}[A-Za-z0-9_.-]*@{1}[A-Za-z0-9_.-]{1,}\.[A-Za-z0-9]{1,}$/
+    );
+    switch (target) {
+      case "email":
+        if (!value || !emailRegex.test(value)) return false;
+        break;
+      case "password":
+        if (!value || !pwRegex.test(value)) return false;
+        break;
+      case "passwordCheck":
+        if (!value || !pwRegex.test(value) || password !== passwordCheck)
+          return false;
+        break;
+      case "nickname":
+        if (!value || value.length < 3) return false;
+    }
+    return true;
   };
   const register = () => {
     auth
@@ -58,24 +81,62 @@ function Singup({ navigation, state }: Props) {
       <View style={{ flex: 1, alignItems: "center", padding: 20 }}>
         <LabelInput
           title="이메일주소"
-          state={[email, setEmail]}
+          onChangeText={(value) => setEmail(value)}
           textContentType="emailAddress"
+          validationMessage={
+            !validation("email", email) && "이메일주소 형식을 확인해주세요"
+          }
+          style={{
+            borderColor: validation("email", email) ? themeColor(5) : "#dc3545",
+          }}
         />
-        <LabelInput title="닉네임" state={[nickname, setNickname]} />
+        <LabelInput
+          title="닉네임"
+          validationMessage={
+            !validation("nickname", nickname) &&
+            "닉네임은 3글자 이상이어야합니다"
+          }
+          style={{
+            borderColor: validation("nickname", nickname)
+              ? themeColor(5)
+              : "#dc3545",
+          }}
+          onChangeText={(value) => setNickname(value)}
+        />
         <LabelInput
           title="패스워드"
           secureTextEntry={true}
-          textContentType="password"
-          state={[password, setPassword]}
+          keyboardType="default"
+          validationMessage={
+            !validation("password", password) &&
+            "암호는 영숫자 8문자 이상이어야합니다"
+          }
+          style={{
+            borderColor: validation("password", password)
+              ? themeColor(5)
+              : "#dc3545",
+          }}
+          onChangeText={(value) => setPassword(value)}
         />
         <LabelInput
+          style={{
+            borderColor: validation("passwordCheck", passwordCheck)
+              ? themeColor(5)
+              : "#dc3545",
+          }}
+          validationMessage={
+            !validation("passwordCheck", passwordCheck) &&
+            "암호확인 일치하지 않습니다"
+          }
           title="패스워드확인"
+          keyboardType="default"
           secureTextEntry={true}
-          textContentType="password"
-          state={[nickname, setNickname]}
+          onChangeText={(value) => setPasswordCheck(value)}
         />
         <View style={{ width: "100%", margin: 0, padding: 0 }}>
-          <Text style={[table.label]}>국가/지역</Text>
+          <Text style={[table.label, { alignSelf: "flex-start" }]}>
+            국가/지역
+          </Text>
           {country ? (
             <View
               style={[

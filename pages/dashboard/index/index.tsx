@@ -41,9 +41,7 @@ function TradesMain({ navigation, state }: Props) {
           item.requester_id === currentUser.uid)
     );
     const acceptableList = allRequests.filter(
-      (item) =>
-        item.catcher !== currentUser.uid &&
-        item.requester_id !== currentUser.uid
+      (item) => !item.catcher && item.requester_id !== currentUser.uid
     );
     setRequestingList(myRequest);
     setCatchedList(catchedRequest);
@@ -74,7 +72,7 @@ function TradesMain({ navigation, state }: Props) {
                 "수락된 거래가 없습니다!",
                 "거래가 진행중입니다. 틈틈히 확인해주세요!",
               ]}
-              themeColor={themeColor(6, 0.7)}
+              themeColor={"black"}
             />
           )}
           {RequestingList.length > 0 && (
@@ -87,7 +85,7 @@ function TradesMain({ navigation, state }: Props) {
                 "아직 의뢰중인 거래는 없습니다! ",
                 "의뢰중인 거래입니다. 누군가 의뢰를 받아줄때까지 잠시만 기다려주세요.",
               ]}
-              themeColor={themeColor(1, 0.7)}
+              themeColor={"black"}
             />
           )}
           {AcceptableList.length > 0 && (

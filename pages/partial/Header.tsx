@@ -42,7 +42,7 @@ function Header({ state, setMenuView }: Props) {
         <Text style={{ color: themeColor(6) }}>해외직구,</Text>
         <Text> 해직</Text>
       </Text>
-      {!user && (
+      {/* {!user && (
         <View style={styles.navButton}>
           <FontAwesome.Button
             color="black"
@@ -52,7 +52,7 @@ function Header({ state, setMenuView }: Props) {
             name="bars"
           />
         </View>
-      )}
+      )} */}
     </View>
   );
 }

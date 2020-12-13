@@ -76,8 +76,16 @@ function Menu({ state, navigation }: Props) {
           }
           badgeCount={purchasingTrades.length > 0 && purchasingTrades.length}
         />
-        <SingleButton iconName={faWallet} title="내 지갑" action={() => true} />
-        <SingleButton iconName={faCog} title="설정" action={() => true} />
+        <SingleButton
+          iconName={faWallet}
+          title="내 지갑"
+          action={() => navigation.navigate("Wallet")}
+        />
+        <SingleButton
+          iconName={faCog}
+          title="설정"
+          action={() => navigation.navigate("Setting")}
+        />
       </View>
       <View style={style.row}>
         <SingleButton

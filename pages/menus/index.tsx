@@ -4,6 +4,8 @@ import { createStackNavigator } from "@react-navigation/stack";
 import Menu from "./Index";
 import Tradings from "./TradingList";
 import Messenger from "./Messenger";
+import Wallet from "./Wallet";
+import Setting from "./Setting";
 
 const Stack = createStackNavigator();
 function tradesIndex({ navigation }) {
@@ -27,6 +29,8 @@ function tradesIndex({ navigation }) {
           initialParams={{ type: "purchase" }}
         />
         <Stack.Screen name="Messenger" component={Messenger} />
+        <Stack.Screen name="Wallet" component={Wallet} />
+        <Stack.Screen name="Setting" component={Setting} />
       </Stack.Navigator>
     </View>
   );

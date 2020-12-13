@@ -9,11 +9,20 @@ import { createStackNavigator } from "@react-navigation/stack";
 import * as User from "../../firebase/firestore/users";
 import Signup from "./Signup";
 import { Dispatch } from "redux";
+import { TouchableOpacity } from "react-native-gesture-handler";
+import {
+  faSign,
+  faSignInAlt,
+  faUserPlus,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 
 const Stack = createStackNavigator();
 
 function LoginApp({ state, navigation, setMenuView, setUser }: Props) {
   const emailLabel = useRef(null);
+  const emailInput = useRef(null);
+  const passwordInput = useRef(null);
   const [email, setEmail] = useState(null);
   const [password, setPassword] = useState(null);
   interface OnView {
@@ -52,7 +61,10 @@ function LoginApp({ state, navigation, setMenuView, setUser }: Props) {
       <View style={styles.safeArea}>
         <View style={styles.main}>
           <Text style={styles.title}>로그인</Text>
-          <View style={styles.input}>
+          <View
+            style={styles.input}
+            onTouchStart={() => emailInput.current.focus()}
+          >
             <Text
               ref={emailLabel}
               style={{ display: onView.email, fontWeight: "bold" }}
@@ -61,13 +73,17 @@ function LoginApp({ state, navigation, setMenuView, setUser }: Props) {
             </Text>
             <TextInput
               placeholder="메일주소"
+              ref={emailInput}
               autoCapitalize="none"
               spellCheck={false}
               onChangeText={(value) => setEmail(value)}
-              style={{ width: 100, position: "absolute", top: 23 }}
+              style={{ width: "100%", position: "absolute", top: 23 }}
             />
           </View>
-          <View style={styles.input}>
+          <View
+            style={styles.input}
+            onTouchStart={() => passwordInput.current.focus()}
+          >
             <Text
               ref={emailLabel}
               style={{ display: onView.password, fontWeight: "bold" }}
@@ -75,64 +91,83 @@ function LoginApp({ state, navigation, setMenuView, setUser }: Props) {
               패스워드
             </Text>
             <TextInput
+              ref={passwordInput}
               placeholder="패스워드"
               secureTextEntry={true}
               textContentType="password"
               spellCheck={false}
               onChangeText={(value) => setPassword(value)}
-              style={{ width: 100, position: "absolute", top: 23 }}
+              style={{ width: "100%", position: "absolute", top: 23 }}
             />
           </View>
           <View style={{ flexDirection: "row" }}>
-            <FontAwesome.Button
-              style={[
-                styles.submit,
-                {
-                  borderWidth: 1,
-                  borderColor: "#ccc",
-                  borderRadius: 5,
-                },
-              ]}
-              color="rgba(0,0,0,.8)"
-              size={24}
-              onPress={() => submit().catch(console.log)}
-              name="sign-in"
+            <TouchableOpacity
+              onPress={() =>
+                submit().catch((err) => {
+                  Alert.alert("err", String(err));
+                })
+              }
+              containerStyle={{ justifyContent: "center" }}
             >
-              <Text
-                style={{
-                  fontSize: 18,
-                  fontWeight: "bold",
-                  color: "rgba(0,0,0,.8)",
-                }}
+              <View
+                style={[
+                  { flexDirection: "row" },
+                  styles.submit,
+                  {
+                    borderWidth: 1,
+                    borderColor: "#ccc",
+                    borderRadius: 5,
+                    padding: 10,
+                    alignItems: "center",
+                  },
+                ]}
               >
-                로그인
-              </Text>
-            </FontAwesome.Button>
+                <FontAwesomeIcon size={20} icon={faSignInAlt}></FontAwesomeIcon>
+                <Text
+                  style={{
+                    fontSize: 18,
+                    fontWeight: "bold",
+                    color: "rgba(0,0,0,.8)",
+                    alignSelf: "center",
+                  }}
+                >
+                  {" "}
+                  로그인
+                </Text>
+              </View>
+            </TouchableOpacity>
             <View style={{ width: 5 }} />
-            <FontAwesome.Button
-              style={[
-                styles.submit,
-                {
-                  borderWidth: 1,
-                  borderColor: "#ccc",
-                  borderRadius: 5,
-                },
-              ]}
-              color="rgba(0,0,0,.8)"
-              size={24}
+            <TouchableOpacity
               onPress={() => navigation.navigate("Signup")}
-              name="user-plus"
+              containerStyle={{ justifyContent: "center" }}
             >
-              <Text
-                style={{
-                  fontSize: 18,
-                  fontWeight: "bold",
-                  color: "rgba(0,0,0,.8)",
-                }}
+              <View
+                style={[
+                  { flexDirection: "row" },
+                  styles.submit,
+                  {
+                    borderWidth: 1,
+                    borderColor: "#ccc",
+                    borderRadius: 5,
+                    padding: 10,
+                    alignItems: "center",
+                  },
+                ]}
               >
-                회원가입
-              </Text>
-            </FontAwesome.Button>
+                <FontAwesomeIcon size={20} icon={faUserPlus}></FontAwesomeIcon>
+                <Text
+                  style={{
+                    fontSize: 18,
+                    fontWeight: "bold",
+                    color: "rgba(0,0,0,.8)",
+                    alignSelf: "center",
+                  }}
+                >
+                  {" "}
+                  회원가입
+                </Text>
+              </View>
+            </TouchableOpacity>
           </View>
         </View>
       </View>

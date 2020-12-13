@@ -1,4 +1,23 @@
-class LikedPeoples {}
+class Message {
+  _id: string;
+  createdAt: Date;
+  text: string;
+  user: any;
+  viewd: string[];
+  constructor(
+    _id: string,
+    createdAt: Date,
+    text: string,
+    user: any,
+    viewd: string[]
+  ) {
+    this._id = _id;
+    this.createdAt = createdAt;
+    this.text = text;
+    this.user = user;
+    this.viewd = viewd;
+  }
+}
 class Trade {
   name: string;
   place: string;
@@ -9,7 +28,8 @@ class Trade {
   requester_id: string;
   id: string;
   catcher: string;
-  images?: string[];
+  images: string[];
+  messages: Message[];
   constructor(
     id: string,
     name: string,
@@ -20,7 +40,8 @@ class Trade {
     created_at: Date,
     requester_id: string,
     catcher: string,
-    images: string[]
+    images: string[],
+    messages?: Message[]
   ) {
     this.id = id;
     this.name = name;
@@ -32,6 +53,7 @@ class Trade {
     this.requester_id = requester_id;
     this.catcher = catcher;
     this.images = images;
+    this.messages = messages;
   }
 }
 const Converter = {
@@ -64,9 +86,10 @@ const Converter = {
       data.created_at.toDate(),
       data.requester_id,
       data.catcher,
-      data.images
+      data.images,
+      data.messages
     );
   },
 };
 
-export { Trade as Class, Converter };
+export { Trade as Class, Converter, Message };

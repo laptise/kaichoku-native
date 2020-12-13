@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { InitialState, Props } from "../../../store/reducer";
 import * as Trade from "../../../firebase/firestore/trades";
 import { ScrollView, TouchableOpacity } from "react-native-gesture-handler";
-import { faCommentDots } from "@fortawesome/free-solid-svg-icons";
+import { faCommentDots, faInfo } from "@fortawesome/free-solid-svg-icons";
 
 class TextSet {
   type: "sell" | "buy";
@@ -32,12 +32,19 @@ function TradingList({ state, route, navigation }: Props) {
     setTrades([]);
     const trades = await Promise.all(
       tradeIds.map(async (tradeId) => {
-        const trade = await firestore
+        const tradeRef = firestore
           .collection("trades")
           .withConverter(Trade.Converter)
-          .doc(tradeId)
+          .doc(tradeId);
+        const trade = await tradeRef.get().then((doc) => doc.data());
+        const messages = await tradeRef
+          .collection("messages")
           .get()
-          .then((doc) => doc.data());
+          .then((snapshot) => snapshot.docs.map((doc) => doc.data()));
+        trade["unreadMessages"] = messages.filter(
+          (msg) => !msg.viewd.includes(auth.currentUser.uid)
+        ).length;
+        console.log(trade);
         return trade;
       })
     );
@@ -53,13 +60,31 @@ function TradingList({ state, route, navigation }: Props) {
         {trades.map((trade) => (
           <View style={style.singleTrade} key={trade.id}>
             <Text>{trade.name}</Text>
-            <View style={{ justifyContent: "center", alignItems: "center" }}>
+            <View style={style.toolbox}>
               <TouchableOpacity
+                containerStyle={style.singleTool}
                 onPress={() =>
                   navigation.navigate("Messenger", { tradeId: trade.id })
                 }
               >
-                <FontAwesomeIcon icon={faCommentDots} size={22} />
+                <FontAwesomeIcon icon={faCommentDots} size={18} />
+                {trade["unreadMessages"] > 0 && (
+                  <View style={style.unreadMessages}>
+                    <Text
+                      style={{
+                        color: "white",
+                        fontWeight: "bold",
+                        fontSize: 11,
+                        textAlign: "center",
+                      }}
+                    >
+                      {trade["unreadMessages"]}
+                    </Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity containerStyle={style.singleTool}>
+                <FontAwesomeIcon icon={faInfo} size={18} />
               </TouchableOpacity>
             </View>
           </View>
@@ -70,15 +95,36 @@ function TradingList({ state, route, navigation }: Props) {
 }
 const style = StyleSheet.create({
   containter: {
-    padding: 10,
+    padding: 20,
     flex: 1,
+    backgroundColor: "white",
+    borderRadius: 20,
+    margin: 20,
+  },
+  unreadMessages: {
+    top: -10,
+    right: -15,
+    position: "absolute",
+    backgroundColor: "red",
+    width: 15,
+    height: 15,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  toolbox: { flexDirection: "row" },
+  singleTool: {
+    marginHorizontal: 10,
   },
   singleTrade: {
     padding: 10,
     marginVertical: 5,
     color: "white",
+    alignItems: "center",
     flexDirection: "row",
     justifyContent: "space-between",
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
   },
 });
 
