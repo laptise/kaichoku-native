@@ -24,7 +24,7 @@ function TradingList({ state, route, navigation }: Props) {
   const textSet =
     route.params.type === "sell" ? textSetList[0] : textSetList[1];
   const [trades, setTrades] = useState([] as Trade.Class[]);
-  const [counts, setCounts] = useState(0);
+  const [isCatcher, setIsCatcher] = useState(null);
   const firebase = state.firebase;
   const firestore = firebase.firestore();
   const auth = firebase.auth();
@@ -37,17 +37,13 @@ function TradingList({ state, route, navigation }: Props) {
     const trade = await tradeRef.get().then((doc) => doc.data());
     return trade;
   };
+  const unreadMessages =
+    route.params.type === "sell" ? "catcherUnread" : "requesterUnread";
   const getTrades = async () => {
     setTrades([]);
     const trades = await Promise.all(
       tradeIds.map(async (tradeId) => {
         const trade = await singleRequestData(tradeId);
-
-        const counts =
-          auth.currentUser.uid === trade.catcher
-            ? trade.catcherUnread
-            : trade.requesterUnread;
-        setCounts(counts);
         return trade;
       })
     );
@@ -71,7 +67,7 @@ function TradingList({ state, route, navigation }: Props) {
                 }
               >
                 <FontAwesomeIcon icon={faCommentDots} size={18} />
-                {counts > 0 && (
+                {trade[unreadMessages] && (
                   <View style={style.unreadMessages}>
                     <Text
                       style={{
@@ -81,7 +77,7 @@ function TradingList({ state, route, navigation }: Props) {
                         textAlign: "center",
                       }}
                     >
-                      {counts}
+                      {trade[unreadMessages]}
                     </Text>
                   </View>
                 )}

@@ -56,19 +56,20 @@ function Messenger({ state, route }: Props) {
     .collection("messages");
   const tradeRef = firestore.collection("trades").doc(tradeId);
   const onSend = async (newMessages = []) => {
-    if (isCatcher)
-      tradeRef.update({
-        requesterUnread: state.firebase.firestore.FieldValue.increment(1),
-      });
-    else
-      tradeRef.update({
-        catcherUnread: state.firebase.firestore.FieldValue.increment(1),
-      });
     newMessages.forEach(async (newMessage) => {
       await currentMessageRef
         .doc(String(10000000000000 - new Date().valueOf()))
         .set(newMessage);
     });
+    const increment = state.firebase.firestore.FieldValue.increment(1);
+    if (isCatcher)
+      await tradeRef.update({
+        requesterUnread: increment,
+      });
+    else
+      await tradeRef.update({
+        catcherUnread: increment,
+      });
   };
   const recogCatcher = async () => {
     await tradeRef
@@ -78,7 +79,11 @@ function Messenger({ state, route }: Props) {
         const res = doc.data();
         if (res.catcher === auth.currentUser.uid) setIsCatcher(true);
         else setIsCatcher(false);
+        return true;
       });
+    isCatcher
+      ? await tradeRef.update({ catcherUnread: 0 })
+      : await tradeRef.update({ requesterUnread: 0 });
   };
   const getUser = async () => {
     const user = await firestore
@@ -94,9 +99,6 @@ function Messenger({ state, route }: Props) {
     getUser();
     currentMessageRef.onSnapshot((snapshot) => {
       const messages = snapshot.docs.map((doc) => {
-        if (isCatcher) {
-          tradeRef.update({ catcherUnread: 0 });
-        } else tradeRef.update({ requesterUnread: 0 });
         const singleResut = doc.data();
         singleResut.createdAt = singleResut.createdAt.toDate();
         return singleResut;
