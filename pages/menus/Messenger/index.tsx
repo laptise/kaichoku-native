@@ -1,14 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  Animated,
-  RefreshControl,
-  KeyboardAvoidingView,
-  Platform,
-} from "react-native";
-import { createStackNavigator } from "@react-navigation/stack";
+import { StyleSheet, Text, View } from "react-native";
 import { InitialState, Props } from "../../../store/reducer";
 import { connect } from "react-redux";
 import { ScrollView } from "react-native-gesture-handler";
@@ -23,33 +14,35 @@ function Header() {
     </View>
   );
 }
-const renderBubble = (props) => {
-  return (
-    <Bubble
-      {...props}
-      textProps={{
-        style: {
-          color: "#fff",
-        },
-      }}
-      textStyle={{
-        left: {
-          color: "#fff",
-        },
-        right: {
-          color: "#fff",
-        },
-      }}
-    />
-  );
-};
+
 function Messenger({ state, route }: Props) {
   const [messages, setMessages] = useState([]);
   const [user, setUser] = useState(null as User.Class);
-  const [isCatcher, setIsCatcher] = useState(null);
-  const firestore = state.firebase.firestore();
-  const auth = state.firebase.auth();
+  const isCatcher = route.params.type === "sell" ? true : false;
+  const firebase = state.firebase;
+  const firestore = firebase.firestore();
+  const auth = firebase.auth();
   const tradeId = route.params.tradeId;
+  const renderBubble = (props) => {
+    return (
+      <Bubble
+        {...props}
+        textProps={{
+          style: {
+            color: "#fff",
+          },
+        }}
+        textStyle={{
+          left: {
+            color: "#fff",
+          },
+          right: {
+            color: "#fff",
+          },
+        }}
+      />
+    );
+  };
   const currentMessageRef = firestore
     .collection("trades")
     .doc(tradeId)
@@ -71,21 +64,12 @@ function Messenger({ state, route }: Props) {
         catcherUnread: increment,
       });
   };
-  const recogCatcher = async () => {
-    await tradeRef
-      .withConverter(Trade.Converter)
-      .get()
-      .then((doc) => {
-        const res = doc.data();
-        if (res.catcher === auth.currentUser.uid) setIsCatcher(true);
-        else setIsCatcher(false);
-        return true;
-      });
+
+  const getUser = async () => {
     isCatcher
       ? await tradeRef.update({ catcherUnread: 0 })
       : await tradeRef.update({ requesterUnread: 0 });
-  };
-  const getUser = async () => {
+
     const user = await firestore
       .collection("users")
       .doc(auth.currentUser.uid)
@@ -94,8 +78,8 @@ function Messenger({ state, route }: Props) {
       .then((doc) => doc.data());
     setUser(user);
   };
+
   useEffect(() => {
-    recogCatcher();
     getUser();
     currentMessageRef.onSnapshot((snapshot) => {
       const messages = snapshot.docs.map((doc) => {

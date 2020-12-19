@@ -40,8 +40,9 @@ function TradesMain({ navigation, state }: Props) {
         (item.catcher === currentUser.uid ||
           item.requester_id === currentUser.uid)
     );
+    console.log(allRequests);
     const acceptableList = allRequests.filter(
-      (item) => !item.catcher && item.requester_id !== currentUser.uid
+      (item) => !item["catcher"] && item.requester_id !== auth.currentUser.uid
     );
     setRequestingList(myRequest);
     setCatchedList(catchedRequest);
@@ -98,7 +99,7 @@ function TradesMain({ navigation, state }: Props) {
                 "현재 수락가능한 거래가 없습니다. 나중에 다시 확인해주세요.",
                 "수락가능한 거래입니다. 거래를 수락해염",
               ]}
-              themeColor={themeColor(7, 0.7)}
+              themeColor={"black"}
             />
           )}
         </View>

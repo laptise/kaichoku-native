@@ -36,7 +36,6 @@ function Menu({ state, navigation }: Props) {
       .get()
       .then((snapshot) => snapshot.docs.map((doc) => doc.data()));
     setCatchedTrades(catchedTrades);
-    console.log(111);
     const purchasingTrades = await firestore
       .collection("trades")
       .where("requester_id", "==", auth.currentUser.uid)

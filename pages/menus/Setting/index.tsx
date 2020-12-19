@@ -15,8 +15,8 @@ function Setting({ state, setUser }: Props) {
   const firebase = state.firebase;
   const auth = firebase.auth();
   const logout = () => {
-    auth.signOut();
     setUser(null);
+    auth.signOut();
   };
   return (
     <View style={style.container}>

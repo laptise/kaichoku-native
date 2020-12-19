@@ -15,6 +15,23 @@ class TextSet {
     this.title = title;
   }
 }
+function Badge({ count }) {
+  console.log(count);
+  return (
+    <View style={style.unreadMessages}>
+      <Text
+        style={{
+          color: "white",
+          fontWeight: "bold",
+          fontSize: 11,
+          textAlign: "center",
+        }}
+      >
+        {count}
+      </Text>
+    </View>
+  );
+}
 
 function TradingList({ state, route, navigation }: Props) {
   const textSetList = [
@@ -24,7 +41,6 @@ function TradingList({ state, route, navigation }: Props) {
   const textSet =
     route.params.type === "sell" ? textSetList[0] : textSetList[1];
   const [trades, setTrades] = useState([] as Trade.Class[]);
-  const [isCatcher, setIsCatcher] = useState(null);
   const firebase = state.firebase;
   const firestore = firebase.firestore();
   const auth = firebase.auth();
@@ -50,7 +66,24 @@ function TradingList({ state, route, navigation }: Props) {
     setTrades(trades);
   };
   useEffect(() => {
-    getTrades();
+    const docs = firestore
+      .collection("trades")
+      .where(firebase.firestore.FieldPath.documentId(), "in", tradeIds)
+      .withConverter(Trade.Converter);
+
+    docs.onSnapshot((snapshot) => {
+      const trades = snapshot.docs.map((doc) => {
+        doc.ref.collection("messages").onSnapshot((snapshot) => {
+          return doc.data();
+        });
+        return doc.data();
+      });
+      setTrades(trades);
+    });
+    return function cleanup() {
+      docs.onSnapshot(() => {});
+      console.log(8818);
+    };
   }, []);
   return (
     <ScrollView>
@@ -63,26 +96,26 @@ function TradingList({ state, route, navigation }: Props) {
               <TouchableOpacity
                 containerStyle={style.singleTool}
                 onPress={() =>
-                  navigation.navigate("Messenger", { tradeId: trade.id })
+                  navigation.navigate("Messenger", {
+                    tradeId: trade.id,
+                    type: route.params.type,
+                  })
                 }
               >
                 <FontAwesomeIcon icon={faCommentDots} size={18} />
-                {trade[unreadMessages] && (
-                  <View style={style.unreadMessages}>
-                    <Text
-                      style={{
-                        color: "white",
-                        fontWeight: "bold",
-                        fontSize: 11,
-                        textAlign: "center",
-                      }}
-                    >
-                      {trade[unreadMessages]}
-                    </Text>
-                  </View>
+                {typeof trade[unreadMessages] === "number" &&
+                trade[unreadMessages] > 0 ? (
+                  <Badge count={trade[unreadMessages]} />
+                ) : (
+                  true
                 )}
               </TouchableOpacity>
-              <TouchableOpacity containerStyle={style.singleTool}>
+              <TouchableOpacity
+                containerStyle={style.singleTool}
+                onPress={() =>
+                  navigation.navigate("TradeStatus", { tradeId: trade.id })
+                }
+              >
                 <FontAwesomeIcon icon={faInfo} size={18} />
               </TouchableOpacity>
             </View>

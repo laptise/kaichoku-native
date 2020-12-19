@@ -6,6 +6,7 @@ import Tradings from "./TradingList";
 import Messenger from "./Messenger";
 import Wallet from "./Wallet";
 import Setting from "./Setting";
+import TradeStatus from "./TradeStatus";
 
 const Stack = createStackNavigator();
 function tradesIndex({ navigation }) {
@@ -29,6 +30,7 @@ function tradesIndex({ navigation }) {
           initialParams={{ type: "purchase" }}
         />
         <Stack.Screen name="Messenger" component={Messenger} />
+        <Stack.Screen name="TradeStatus" component={TradeStatus} />
         <Stack.Screen name="Wallet" component={Wallet} />
         <Stack.Screen name="Setting" component={Setting} />
       </Stack.Navigator>
