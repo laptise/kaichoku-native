@@ -7,6 +7,12 @@ import Messenger from "./Messenger";
 import Wallet from "./Wallet";
 import Setting from "./Setting";
 import TradeStatus from "./TradeStatus";
+import EditProfile from "./EditProfile";
+import Notice from "./Notice";
+import Contact from "./Contact";
+import Information from "./Information";
+import MapDetail from "./TradeStatus/MapDetail";
+import themeColor from "../../components/colors";
 
 const Stack = createStackNavigator();
 function tradesIndex({ navigation }) {
@@ -16,14 +22,14 @@ function tradesIndex({ navigation }) {
         initialRouteName="Menu"
         screenOptions={{
           headerShown: false,
+          headerStyle: {
+            backgroundColor: themeColor(1),
+          },
+          headerBackTitleStyle: { color: "white" },
         }}
       >
         <Stack.Screen name="Menu" component={Menu} />
-        <Stack.Screen
-          name="sellTradings"
-          component={Tradings}
-          initialParams={{ type: "sell" }}
-        />
+        <Stack.Screen name="sellTradings" component={Tradings} initialParams={{ type: "sell" }} />
         <Stack.Screen
           name="purchaseTradings"
           component={Tradings}
@@ -33,6 +39,11 @@ function tradesIndex({ navigation }) {
         <Stack.Screen name="TradeStatus" component={TradeStatus} />
         <Stack.Screen name="Wallet" component={Wallet} />
         <Stack.Screen name="Setting" component={Setting} />
+        <Stack.Screen name="EditProfile" component={EditProfile} />
+        <Stack.Screen name="Notice" component={Notice} />
+        <Stack.Screen name="Contact" component={Contact} />
+        <Stack.Screen name="Information" component={Information} />
+        <Stack.Screen name="MapDetail" component={MapDetail} />
       </Stack.Navigator>
     </View>
   );

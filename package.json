@@ -61,7 +61,9 @@
     "redux": "^4.0.5",
     "redux-form": "^8.3.6",
     "redux-thunk": "^2.3.0",
-    "sha256": "^0.2.0"
+    "sha256": "^0.2.0",
+    "react-native-maps": "0.27.1",
+    "expo-notifications": "~0.7.2"
   },
   "devDependencies": {
     "@babel/core": "~7.9.0",

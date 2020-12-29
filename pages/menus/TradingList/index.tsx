@@ -16,7 +16,6 @@ class TextSet {
   }
 }
 function Badge({ count }) {
-  console.log(count);
   return (
     <View style={style.unreadMessages}>
       <Text
@@ -38,23 +37,18 @@ function TradingList({ state, route, navigation }: Props) {
     new TextSet("sell", "판매중인 거래"), //
     new TextSet("buy", "구매중인거래"),
   ];
-  const textSet =
-    route.params.type === "sell" ? textSetList[0] : textSetList[1];
+  const textSet = route.params.type === "sell" ? textSetList[0] : textSetList[1];
   const [trades, setTrades] = useState([] as Trade.Class[]);
   const firebase = state.firebase;
   const firestore = firebase.firestore();
   const auth = firebase.auth();
   const tradeIds: string[] = route.params.tradeIds;
   const singleRequestData = async (tradeId: string) => {
-    const tradeRef = firestore
-      .collection("trades")
-      .withConverter(Trade.Converter)
-      .doc(tradeId);
+    const tradeRef = firestore.collection("trades").withConverter(Trade.Converter).doc(tradeId);
     const trade = await tradeRef.get().then((doc) => doc.data());
     return trade;
   };
-  const unreadMessages =
-    route.params.type === "sell" ? "catcherUnread" : "requesterUnread";
+  const unreadMessages = route.params.type === "sell" ? "catcherUnread" : "requesterUnread";
   const getTrades = async () => {
     setTrades([]);
     const trades = await Promise.all(
@@ -82,7 +76,6 @@ function TradingList({ state, route, navigation }: Props) {
     });
     return function cleanup() {
       docs.onSnapshot(() => {});
-      console.log(8818);
     };
   }, []);
   return (
@@ -103,8 +96,7 @@ function TradingList({ state, route, navigation }: Props) {
                 }
               >
                 <FontAwesomeIcon icon={faCommentDots} size={18} />
-                {typeof trade[unreadMessages] === "number" &&
-                trade[unreadMessages] > 0 ? (
+                {typeof trade[unreadMessages] === "number" && trade[unreadMessages] > 0 ? (
                   <Badge count={trade[unreadMessages]} />
                 ) : (
                   true
@@ -113,7 +105,7 @@ function TradingList({ state, route, navigation }: Props) {
               <TouchableOpacity
                 containerStyle={style.singleTool}
                 onPress={() =>
-                  navigation.navigate("TradeStatus", { tradeId: trade.id })
+                  navigation.navigate("TradeStatus", { tradeId: trade.id, type: route.params.type })
                 }
               >
                 <FontAwesomeIcon icon={faInfo} size={18} />

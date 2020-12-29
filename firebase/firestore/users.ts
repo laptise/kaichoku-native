@@ -5,13 +5,15 @@ class User {
   countryCode: number;
   entryDate: Date;
   comment: string;
+  deviceToken: string;
   constructor(
     uid: string,
     email: string,
     nickname: string,
     countryCode: number,
     entryDate: Date,
-    comment: string
+    comment: string,
+    deviceToken: string
   ) {
     this.comment = comment;
     this.countryCode = countryCode;
@@ -19,6 +21,7 @@ class User {
     this.entryDate = entryDate;
     this.nickname = nickname;
     this.uid = uid;
+    this.deviceToken = deviceToken;
   }
 }
 const Converter = {
@@ -30,6 +33,7 @@ const Converter = {
       countryCode: user.countryCode,
       entryDate: user.entryDate,
       comment: user.comment,
+      deveiceToken: user.deviceToken,
     };
   },
   fromFirestore: function (
@@ -43,7 +47,8 @@ const Converter = {
       user.nickname,
       user.countryCode,
       user.entryDate.toDate(),
-      user.comment
+      user.comment,
+      user.deviceToken
     );
   },
 };

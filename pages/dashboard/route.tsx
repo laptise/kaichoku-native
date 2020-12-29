@@ -4,7 +4,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import AddNewRequest from "./newRequest";
 import RequestInfo from "./requestInfo";
 import UserInfo from "./userInfo";
-import Index from "./Index";
+import Index from "./main/index";
 
 const Stack = createStackNavigator();
 function tradesIndex({ navigation }) {

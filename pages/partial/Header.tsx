@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { postLogin, setMenuView } from "../../store/action";
+import { postLogin, setMenuView, setRequested, setCatched } from "../../store/action";
 import { Button, StyleSheet, Text, View, Animated } from "react-native";
 import { connect } from "react-redux";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
@@ -7,25 +7,28 @@ import { FontAwesome } from "@expo/vector-icons";
 import { InitialState, Props } from "../../store/reducer";
 import { faBars, faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import themeColor from "../../components/colors";
-import {
-  faHome,
-  faEllipsisH,
-  faStream,
-} from "@fortawesome/free-solid-svg-icons";
+import * as Trade from "../../firebase/firestore/trades";
 
-function Header({ state, setMenuView }: Props) {
-  const buttonStyle = {
-    position: "absolute",
-    right: 15,
-    top: 50,
-  };
+function Header({ state, setMenuView, setCatched, setRequested }: Props) {
+  const firebase = state.firebase;
+  const firestore = firebase.firestore();
+  const auth = firebase.auth();
   const [user, setUser] = useState(false);
+
   useEffect(() => {
-    if (state.menuView) {
-      buttonStyle.right = 35;
-    } else {
-      buttonStyle.right = 15;
-    }
+    // state.firebase
+    //   .firestore()
+    //   .collection("trades")
+    //   .where("catcher", ">", "")
+    //   .get()
+    //   .then((snapshot) => {
+    //     snapshot.forEach((doc) => {
+    //       doc.ref
+    //         .collection("tradeStatus")
+    //         .doc("catched")
+    //         .set({ at: new Date(2020, 11, 9), action: "catched" });
+    //     });
+    //   });
     state.firebase.auth().onAuthStateChanged(function (user) {
       if (user) {
         setUser(false);
@@ -33,8 +36,22 @@ function Header({ state, setMenuView }: Props) {
         setUser(true);
       }
     });
-  });
-
+    const tradesRef = firestore.collection("trades");
+    const catchedRequestRefs = tradesRef.where("catcher", "==", auth.currentUser.uid);
+    catchedRequestRefs.onSnapshot((snapshot) => {
+      const trades = snapshot.docs.map((doc) => doc.data() as Trade.Class);
+      setCatched(trades);
+    });
+    const requestedRefs = tradesRef.where("requester_id", "==", auth.currentUser.uid);
+    requestedRefs.onSnapshot((snapshot) => {
+      const trades = snapshot.docs.map((doc) => doc.data() as Trade.Class);
+      setRequested(trades);
+    });
+    return () => {
+      catchedRequestRefs.onSnapshot(() => {});
+      requestedRefs.onSnapshot(() => {});
+    };
+  }, []);
   return (
     <View style={styles.header}>
       <Text style={styles.text}>
@@ -42,17 +59,6 @@ function Header({ state, setMenuView }: Props) {
         <Text style={{ color: themeColor(6) }}>해외직구,</Text>
         <Text> 해직</Text>
       </Text>
-      {/* {!user && (
-        <View style={styles.navButton}>
-          <FontAwesome.Button
-            color="black"
-            style={{ backgroundColor: "white" }}
-            onPress={() => setMenuView(!state.menuView)}
-            size={22}
-            name="bars"
-          />
-        </View>
-      )} */}
     </View>
   );
 }
@@ -94,6 +100,12 @@ function mapDispatchToProps(dispatch) {
   return {
     setMenuView(status) {
       dispatch(setMenuView(status));
+    },
+    setRequested(trades) {
+      dispatch(setRequested(trades));
+    },
+    setCatched(trades) {
+      dispatch(setCatched(trades));
     },
   };
 }

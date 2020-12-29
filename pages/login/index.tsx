@@ -10,12 +10,10 @@ import * as User from "../../firebase/firestore/users";
 import Signup from "./Signup";
 import { Dispatch } from "redux";
 import { TouchableOpacity } from "react-native-gesture-handler";
-import {
-  faSign,
-  faSignInAlt,
-  faUserPlus,
-} from "@fortawesome/free-solid-svg-icons";
+import { faSign, faSignInAlt, faUserPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import * as Notifications from "expo-notifications";
+import * as Permissions from "expo-permissions";
 
 const Stack = createStackNavigator();
 
@@ -33,22 +31,45 @@ function LoginApp({ state, navigation, setMenuView, setUser }: Props) {
     email: email ? "flex" : "none",
     password: password ? "flex" : "none",
   };
+
+  const getDeviceToken = async () => {
+    // プッシュ通知のパーミッションを取得
+    const { status: existingStatus } = await Permissions.getAsync(Permissions.NOTIFICATIONS);
+    let finalStatus = existingStatus;
+
+    // すでにプッシュ通知が許可されていればなにもしない
+    if (existingStatus !== "granted") {
+      // (iOS向け) プッシュ通知の許可をユーザーに求める
+      const { status } = await Permissions.askAsync(Permissions.NOTIFICATIONS);
+      finalStatus = status;
+    }
+
+    // プッシュ通知が許可されなかった場合なにもしない
+    if (finalStatus !== "granted") {
+      return;
+    }
+
+    // Expo 用のデバイストークンを取得
+    const token = await Notifications.getExpoPushTokenAsync();
+    return token;
+  };
   const submit = async () => {
     if (!email || !password) {
       Alert.alert("로그인 실패", "이메일과 패스워드는 필수입력 항목입니다!");
       return false;
     }
-    const userCredential = await state.firebase
-      .auth()
-      .signInWithEmailAndPassword(email, password);
+    const userCredential = await state.firebase.auth().signInWithEmailAndPassword(email, password);
     const user = userCredential.user;
-    const userData = await state.firebase
-      .firestore()
-      .collection("users")
-      .doc(user.uid)
+    const userDataRef = await state.firebase.firestore().collection("users").doc(user.uid);
+    const userData = await userDataRef
       .withConverter(User.Converter)
       .get()
-      .then((res) => res.data());
+      .then((res) => {
+        return res.data();
+      });
+    const deviceToken = await getDeviceToken();
+    deviceToken && (await userDataRef.update({ deviceToken: deviceToken.data }));
+
     setUser(userData);
   };
   useEffect(() => {
@@ -61,14 +82,8 @@ function LoginApp({ state, navigation, setMenuView, setUser }: Props) {
       <View style={styles.safeArea}>
         <View style={styles.main}>
           <Text style={styles.title}>로그인</Text>
-          <View
-            style={styles.input}
-            onTouchStart={() => emailInput.current.focus()}
-          >
-            <Text
-              ref={emailLabel}
-              style={{ display: onView.email, fontWeight: "bold" }}
-            >
+          <View style={styles.input} onTouchStart={() => emailInput.current.focus()}>
+            <Text ref={emailLabel} style={{ display: onView.email, fontWeight: "bold" }}>
               메일주소
             </Text>
             <TextInput
@@ -80,14 +95,8 @@ function LoginApp({ state, navigation, setMenuView, setUser }: Props) {
               style={{ width: "100%", position: "absolute", top: 23 }}
             />
           </View>
-          <View
-            style={styles.input}
-            onTouchStart={() => passwordInput.current.focus()}
-          >
-            <Text
-              ref={emailLabel}
-              style={{ display: onView.password, fontWeight: "bold" }}
-            >
+          <View style={styles.input} onTouchStart={() => passwordInput.current.focus()}>
+            <Text ref={emailLabel} style={{ display: onView.password, fontWeight: "bold" }}>
               패스워드
             </Text>
             <TextInput

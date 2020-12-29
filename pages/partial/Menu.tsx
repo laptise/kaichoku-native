@@ -38,7 +38,6 @@ function Menu({ state, setUser, setMenuView }: Props) {
     } else {
       transformMenu(100);
     }
-    console.log(state.user);
   }, [state]);
   return (
     <Animated.View
@@ -54,9 +53,7 @@ function Menu({ state, setUser, setMenuView }: Props) {
       }}
     >
       <View style={styles.header}>
-        <Text style={{ fontSize: 20, bottom: -5, color: themeColor(6) }}>
-          메뉴
-        </Text>
+        <Text style={{ fontSize: 20, bottom: -5, color: themeColor(6) }}>메뉴</Text>
         <View style={styles.navButton}>
           <FontAwesome.Button
             color="black"

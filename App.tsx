@@ -10,16 +10,13 @@ import Blocker from "./pages/login";
 import Menu from "./pages/menus";
 import Home from "./pages/home/Home";
 import { InitialState, NavigationContainer } from "@react-navigation/native";
-import TradeIndex from "./pages/dashboard/index";
+import TradeIndex from "./pages/dashboard/route";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import {
-  faHome,
-  faEllipsisH,
-  faExchangeAlt,
-} from "@fortawesome/free-solid-svg-icons";
+import { faHome, faEllipsisH, faExchangeAlt } from "@fortawesome/free-solid-svg-icons";
 import { createStackNavigator } from "@react-navigation/stack";
 import firebase from "./firebase";
+import * as Trade from "./firebase/firestore/trades";
 const store = createStore(reducer);
 const Tab = createBottomTabNavigator();
 function App({ state, setFirebase }: Props) {

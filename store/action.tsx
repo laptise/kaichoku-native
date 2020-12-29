@@ -10,6 +10,22 @@ export const setFirebase = (firebase) => {
   };
 };
 
+export const SET_CATCHED = "SET_CATCHED";
+export const setCatched = (trades) => {
+  return {
+    type: SET_CATCHED,
+    trades,
+  };
+};
+
+export const SET_REQUESTED = "SET_REQUESTED";
+export const setRequested = (trades) => {
+  return {
+    type: SET_REQUESTED,
+    trades,
+  };
+};
+
 export const SET_MENU_VIEW = "SET_MENU_VIEW";
 export const setMenuView = (status: Boolean) => {
   return {

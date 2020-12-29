@@ -17,7 +17,16 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.kaichoku.kaichoku",
+      "buildNumber": "1.0.0",
+      "config": {
+        "googleMapsApiKey": "AIzaSyCRmpR4CwNGQk43Q_wln9B6K39FpxTQsZQ"
+      }
+    },
+    "android": {
+      "package": "com.kaichoku.kaichoku",
+      "versionCode": 1
     },
     "web": {
       "favicon": "./assets/favicon.png"

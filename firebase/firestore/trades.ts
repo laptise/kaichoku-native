@@ -4,13 +4,7 @@ class Message {
   text: string;
   user: any;
   viewd: string[];
-  constructor(
-    _id: string,
-    createdAt: Date,
-    text: string,
-    user: any,
-    viewd: string[]
-  ) {
+  constructor(_id: string, createdAt: Date, text: string, user: any, viewd: string[]) {
     this._id = _id;
     this.createdAt = createdAt;
     this.text = text;
@@ -18,6 +12,35 @@ class Message {
     this.viewd = viewd;
   }
 }
+
+export class TradeStatus {
+  at: Date;
+  action: string;
+  step: number;
+  constructor(at: Date, action: string, step: number) {
+    this.at = at;
+    this.action = action;
+    this.step = step;
+  }
+}
+
+export const tradeStatusConverter = {
+  toFirestore: (tradeStatus: TradeStatus) => {
+    return {
+      at: tradeStatus.at,
+      action: tradeStatus.action,
+      step: tradeStatus.step,
+    };
+  },
+  fromFirestore: (
+    snapshot: firebase.firestore.QueryDocumentSnapshot,
+    options: firebase.firestore.SnapshotOptions
+  ): TradeStatus => {
+    const data = snapshot.data(options);
+    return new TradeStatus(data.at.toDate(), data.action, data.step);
+  },
+};
+
 class Trade {
   name: string;
   place: string;
@@ -32,6 +55,8 @@ class Trade {
   messages: Message[];
   requesterUnread: number;
   catcherUnread: number;
+  tradeStatus?: TradeStatus[];
+  isSell?: true;
   constructor(
     id: string,
     name: string,
@@ -43,9 +68,11 @@ class Trade {
     requester_id: string,
     catcher: string,
     images: string[],
-    messages?: Message[],
-    requesterUnread?: number,
-    catcherUnread?: number
+    messages: Message[],
+    requesterUnread: number,
+    catcherUnread: number,
+    tradeStatus: TradeStatus[],
+    isSell?: true
   ) {
     this.id = id;
     this.name = name;
@@ -60,6 +87,8 @@ class Trade {
     this.messages = messages;
     this.requesterUnread = requesterUnread;
     this.catcherUnread = catcherUnread;
+    this.tradeStatus = tradeStatus;
+    this.isSell = isSell;
   }
 }
 const Converter = {
@@ -77,6 +106,7 @@ const Converter = {
       images: trade.images,
       catcherUnread: trade.catcherUnread,
       requesterUnread: trade.catcherUnread,
+      tradeStatus: trade.tradeStatus,
     };
   },
   fromFirestore: function (
@@ -97,7 +127,8 @@ const Converter = {
       data.images,
       data.messages,
       data.requesterUndrea,
-      data.catcherUnread
+      data.catcherUnread,
+      data.tradeStatus
     );
   },
 };

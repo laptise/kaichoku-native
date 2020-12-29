@@ -36,11 +36,8 @@ function TradesMain({ navigation, state }: Props) {
     );
     const catchedRequest = allRequests.filter(
       (item) =>
-        item.catcher &&
-        (item.catcher === currentUser.uid ||
-          item.requester_id === currentUser.uid)
+        item.catcher && (item.catcher === currentUser.uid || item.requester_id === currentUser.uid)
     );
-    console.log(allRequests);
     const acceptableList = allRequests.filter(
       (item) => !item["catcher"] && item.requester_id !== auth.currentUser.uid
     );
@@ -49,6 +46,7 @@ function TradesMain({ navigation, state }: Props) {
     setAcceptableList(acceptableList);
   };
   useEffect(() => {
+    console.log(state.catchedTrades);
     load();
   }, []);
   const onRefresh = useCallback(() => {
@@ -57,17 +55,13 @@ function TradesMain({ navigation, state }: Props) {
   }, []);
   return (
     <>
-      <ScrollView
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-      >
+      <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
         <View style={{ flex: 1 }}>
           {catchedList.length > 0 && (
             <TradeList
               title="진행중인 거래"
               navigation={navigation}
-              trades={catchedList}
+              trades={[...state.catchedTrades]}
               tradeType="catched"
               statusMessage={[
                 "수락된 거래가 없습니다!",

@@ -9,21 +9,19 @@ import {
   Platform,
   Image,
   Alert,
+  Modal,
 } from "react-native";
 import Swiper from "react-native-swiper";
 import * as ImageManipulator from "expo-image-manipulator";
 import { connect } from "react-redux";
-import { Button, Text } from "react-native-elements";
+import { Button, Divider, Text } from "react-native-elements";
 import themeColor from "../../../components/colors";
-import {
-  categories,
-  majorCategories,
-  middleCategories,
-} from "../../../data/categories";
 import * as Trade from "../../../firebase/firestore/trades";
 import * as ImagePicker from "expo-image-picker";
-import Constants from "expo-constants";
-import { stat } from "fs";
+import { TouchableOpacity } from "react-native-gesture-handler";
+import Axios from "axios";
+import { PlaceAPIResponce } from "../../../models/placeAPIResponse";
+import PlaceSearcherModal from "../../../components/modals/PlaceSetter";
 interface FormData {
   requestTitle: string;
   productName: string;
@@ -44,6 +42,8 @@ function AddNewRequest({ navigation, route, state }: Props) {
   const db = firebase.firestore();
   const auth = firebase.auth();
   const [loading, setLoading] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+
   const formData: FormData = {
     requestTitle,
     productName,
@@ -54,9 +54,7 @@ function AddNewRequest({ navigation, route, state }: Props) {
   useEffect(() => {
     (async () => {
       if (Platform.OS !== "web") {
-        const {
-          status,
-        } = await ImagePicker.requestCameraRollPermissionsAsync();
+        const { status } = await ImagePicker.requestCameraRollPermissionsAsync();
         if (status !== "granted") {
           alert("Sorry, we need camera roll permissions to make this work!");
         }
@@ -73,19 +71,14 @@ function AddNewRequest({ navigation, route, state }: Props) {
       const newImages = images.concat();
       const actions = [];
       actions.push({ resize: { width: 350 } });
-      const manipulatorResult = await ImageManipulator.manipulateAsync(
-        result.uri,
-        actions,
-        {
-          compress: 0.4,
-        }
-      );
+      const manipulatorResult = await ImageManipulator.manipulateAsync(result.uri, actions, {
+        compress: 0.4,
+      });
       newImages.push(manipulatorResult.uri);
       setImages(newImages);
     }
   };
   const imgUpload = async (docId: string) => {
-    console.log(114);
     const metadata = {
       contentType: "image/jpeg",
     };
@@ -104,15 +97,6 @@ function AddNewRequest({ navigation, route, state }: Props) {
     return uris;
   };
   const add = async () => {
-    /**delete All */
-    // db.collection("trades")
-    //   .get()
-    //   .then((docs) =>
-    //     docs.forEach((doc) => {
-    //       doc.ref.delete();
-    //     })
-    //   );5
-    /**add To DB */
     const docAndImages = await db
       .collection("trades")
       .add({})
@@ -133,21 +117,24 @@ function AddNewRequest({ navigation, route, state }: Props) {
           new Date(),
           auth.currentUser.uid,
           null,
-          docAndImages.urls || []
+          docAndImages.urls || [],
+          null,
+          0,
+          0,
+          null
         )
       );
-    Alert.alert(
-      "등록완료",
-      "새로운 의뢰를 추가했습니다\n내 거래에서 확인하실 수 있습니다."
-    );
+    Alert.alert("등록완료", "새로운 의뢰를 추가했습니다\n내 거래에서 확인하실 수 있습니다.");
     navigation.goBack();
     navigation.navigate("RequestInfo", {
       id: docAndImages.doc.id,
       type: "requesting",
     });
   };
+  const searchPlace = async () => {};
   return (
     <ScrollView>
+      <PlaceSearcherModal visibleState={[modalVisible, setModalVisible]} />
       <View
         style={{
           flex: 1,
@@ -156,27 +143,31 @@ function AddNewRequest({ navigation, route, state }: Props) {
         }}
       >
         <Text style={{ padding: 20, fontSize: 24 }}>상품구매 의뢰하기</Text>
-        <Text>기재내용이 자세할수록 발송자가 물건을 찾기 쉬워져요.</Text>
-        <Text>최대한 자세하게 적어주세요!</Text>
+        <Divider style={{ height: 2, backgroundColor: themeColor(3), width: "70%" }} />
+        <View style={{ marginVertical: 20 }}>
+          <Text>기재내용이 자세할수록 발송자가 물건을 찾기 쉬워져요.</Text>
+          <Text>최대한 자세하게 적어주세요!</Text>
+        </View>
         <Text style={[table.label]}>의뢰제목</Text>
         <View style={[table.table, table.th]}>
-          <TextInput
-            onChangeText={(e) => setRequestTitle(e)}
-            placeholder="의뢰제목"
-          />
+          <TextInput onChangeText={(e) => setRequestTitle(e)} placeholder="의뢰제목" />
         </View>
-        <Text style={[table.label]}>상품명</Text>
+        <Text style={[table.label]}>구매처정보</Text>
         <View style={[table.table, table.th]}>
-          <TextInput
-            onChangeText={(e) => setProductName(e)}
-            placeholder="상품명"
-          />
+          <TextInput onChangeText={(e) => setPurchasePlace(e)} placeholder="구매장소" />
         </View>
-        <Text style={[table.label]}>구매장소</Text>
+        <TouchableOpacity onPress={() => setModalVisible(true)}>
+          <Text>검색</Text>
+        </TouchableOpacity>
+        <Text style={[table.label]}>상품정보</Text>
+        <View style={[table.table, table.th]}>
+          <TextInput onChangeText={(e) => setProductName(e)} placeholder="상품명" />
+        </View>
+        <Text style={[table.label]}>링크</Text>
         <View style={[table.table, table.th]}>
           <TextInput
             onChangeText={(e) => setPurchasePlace(e)}
-            placeholder="구매장소"
+            placeholder="참고 URL링크 (상품 홈페이지 등)"
           />
         </View>
         <Text style={[table.label]}>가격</Text>
@@ -196,38 +187,44 @@ function AddNewRequest({ navigation, route, state }: Props) {
           />
         </View>
         {/* <CategorySelector /> */}
-        <Swiper
-          style={style.slider}
-          showsButtons={false}
-          showsPagination={false}
-        >
-          {(images.length > 0 &&
-            images.map((image, index) => (
-              <View key={index} style={style.slide1}>
-                <Image
-                  key={index}
-                  style={{ width: "100%", height: "100%" }}
-                  source={{ uri: image }}
-                />
-                <TextInput />
-              </View>
-            ))) || (
-            <View style={style.slide1}>
-              <Text>please add!</Text>
+        {images.length > 0 && (
+          <Swiper style={style.slider} showsButtons={false} showsPagination={false}>
+            {images.length > 0 &&
+              images.map((image, index) => (
+                <View key={index} style={style.slide1}>
+                  <Image
+                    key={index}
+                    style={{ width: "100%", height: "100%" }}
+                    source={{ uri: image }}
+                  />
+                  <TextInput />
+                </View>
+              ))}
+          </Swiper>
+        )}
+        <View style={{ flexDirection: "row" }}>
+          <TouchableOpacity containerStyle={style.bottomButtonViews}>
+            <View
+              style={{ backgroundColor: themeColor(3), padding: 10, borderRadius: 5, margin: 10 }}
+            >
+              <Text style={{ color: "white" }}>취소</Text>
             </View>
-          )}
-        </Swiper>
-        <Button
-          onPress={pickImage}
-          title="사진추가"
-          style={{ marginBottom: 10 }}
-        />
-        <Button
-          onPress={() => setImages([])}
-          title="reset"
-          style={{ marginBottom: 10 }}
-        />
-        <Button onPress={add} title="추가"></Button>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={pickImage} containerStyle={style.bottomButtonViews}>
+            <View
+              style={{ backgroundColor: themeColor(3), padding: 10, borderRadius: 5, margin: 10 }}
+            >
+              <Text style={{ color: "white" }}>사진추가</Text>
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={add} containerStyle={style.bottomButtonViews}>
+            <View
+              style={{ backgroundColor: themeColor(3), padding: 10, borderRadius: 5, margin: 10 }}
+            >
+              <Text style={{ color: "white" }}>의뢰등록</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
       </View>
     </ScrollView>
   );
@@ -241,12 +238,10 @@ function mapDispatchToProps(dispatch) {
   return {};
 }
 
-const AppContainer = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(AddNewRequest);
+const AppContainer = connect(mapStateToProps, mapDispatchToProps)(AddNewRequest);
 
 const style = StyleSheet.create({
+  bottomButtonViews: {},
   slider: {
     height: 300,
     marginVertical: 10,

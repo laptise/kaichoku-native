@@ -1,5 +1,11 @@
 import * as firebase from "firebase";
+import { act } from "react-dom/test-utils";
 import { Class as User } from "../firebase/firestore/users";
+import { Class as Trade } from "../firebase/firestore/trades";
+interface UnreadMessages {
+  purchasing: number;
+  selling: number;
+}
 export interface InitialState {
   uid: string;
   price: number;
@@ -8,6 +14,10 @@ export interface InitialState {
   menuView: boolean;
   dbh: any;
   firebase: typeof firebase;
+  catchedTrades: Trade[];
+  requestedTrades: Trade[];
+  catcherUnread: number;
+  requesterUnread: number;
 }
 const initialState: InitialState = {
   uid: null,
@@ -17,6 +27,10 @@ const initialState: InitialState = {
   menuView: false,
   dbh: null,
   firebase: null,
+  catchedTrades: [],
+  requestedTrades: [],
+  catcherUnread: 0,
+  requesterUnread: 0,
 };
 
 export interface Props {
@@ -31,12 +45,28 @@ export interface Props {
   setUid?: (uid: string) => void;
   postLogin?: (token: string) => void;
   setDbh?: (db: typeof firebase.firestore) => void;
+  setRequested?: (trades: Trade[]) => void;
+  setCatched?: (trades: Trade[]) => void;
+}
+
+function getUnreadMessageCount(trades: Trade[], entry: string) {
+  return trades.reduce((acc, trade) => acc + trade[entry], 0);
 }
 
 export default function appReducer(state = initialState, action) {
   switch (action.type) {
     case "SET_FIREBASE":
       return Object.assign({}, state, { firebase: action.firebase });
+    case "SET_CATCHED":
+      return Object.assign({}, state, {
+        catchedTrades: action.trades,
+        catcherUnread: getUnreadMessageCount(action.trades, "catcherUnread"),
+      });
+    case "SET_REQUESTED":
+      return Object.assign({}, state, {
+        requestedTrades: action.trades,
+        requesterUnread: getUnreadMessageCount(action.trades, "requesterUnread"),
+      });
     case "SET_UID":
       return Object.assign({}, state, { uid: action.uid });
     case "SET_DBH":

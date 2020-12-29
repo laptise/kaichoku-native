@@ -2,11 +2,7 @@ import React, { useEffect, useState } from "react";
 import { connect } from "react-redux";
 import { StyleSheet, Text, View, Animated, Image } from "react-native";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import {
-  faPlus,
-  faExchangeAlt,
-  faPen,
-} from "@fortawesome/free-solid-svg-icons";
+import { faPlus, faExchangeAlt, faPen } from "@fortawesome/free-solid-svg-icons";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { Props, InitialState } from "../../store/reducer";
 import * as Trade from "../../firebase/firestore/trades";
@@ -14,7 +10,7 @@ import * as User from "../../firebase/firestore/users";
 import MaskedView from "@react-native-community/masked-view";
 import { TouchableOpacity } from "react-native-gesture-handler";
 
-function ProfileZone({ state }: Props) {
+function ProfileZone({ state, navigation }: Props) {
   const [user, setUser] = useState(null as User.Class);
   const currentUser = state.firebase.auth().currentUser;
   const getUser = async () => {
@@ -42,12 +38,11 @@ function ProfileZone({ state }: Props) {
               alignItems: "center",
             }}
           >
-            <TouchableOpacity style={{ flexDirection: "row" }}>
-              <FontAwesomeIcon
-                icon={faPen}
-                size={14}
-                style={{ marginRight: 5 }}
-              />
+            <TouchableOpacity
+              style={{ flexDirection: "row" }}
+              onPress={() => navigation.navigate("EditProfile")}
+            >
+              <FontAwesomeIcon icon={faPen} size={14} style={{ marginRight: 5 }} />
               <Text>수정</Text>
             </TouchableOpacity>
           </View>
@@ -76,9 +71,7 @@ function ProfileZone({ state }: Props) {
             />
           </MaskedView>
           <View>
-            <Text style={{ fontSize: 20, fontWeight: "bold" }}>
-              {user.nickname}
-            </Text>
+            <Text style={{ fontSize: 20, fontWeight: "bold" }}>{user.nickname}</Text>
             <Text>{user.email}</Text>
           </View>
         </View>

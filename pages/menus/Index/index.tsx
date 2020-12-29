@@ -21,37 +21,28 @@ import * as Trade from "../../../firebase/firestore/trades";
 import ProfileZone from "../ProfileZone";
 import { Divider } from "react-native-elements";
 import { TouchableOpacity } from "react-native-gesture-handler";
+import { stat } from "fs";
 
 function Menu({ state, navigation }: Props) {
   const firestore = state.firebase.firestore();
   const auth = state.firebase.auth();
-  const [catchedTrades, setCatchedTrades] = useState([] as Trade.Class[]);
+  const [sellingNotifications, setSellingNotifications] = useState(0);
+  const [purchasingNotifications, setPurchasingNotifications] = useState(0);
   const [purchasingTrades, setPurchasingTrades] = useState([] as Trade.Class[]);
-  const getTradeAlert = async () => {
-    setCatchedTrades([]);
-    const catchedTrades = await firestore
-      .collection("trades")
-      .where("catcher", "==", auth.currentUser.uid)
-      .withConverter(Trade.Converter)
-      .get()
-      .then((snapshot) => snapshot.docs.map((doc) => doc.data()));
-    setCatchedTrades(catchedTrades);
-    const purchasingTrades = await firestore
-      .collection("trades")
-      .where("requester_id", "==", auth.currentUser.uid)
-      .where("catcher", ">", "")
-      .withConverter(Trade.Converter)
-      .get()
-      .then((snapshot) => snapshot.docs.map((doc) => doc.data()));
-    setPurchasingTrades(purchasingTrades);
-  };
   useEffect(() => {
-    getTradeAlert();
+    setPurchasingTrades(state.requestedTrades.filter((trade) => trade.catcher));
+    const sellingCounts = state.catchedTrades.reduce((acc, trade) => acc + trade.catcherUnread, 0);
+    const purchasingCounts = purchasingTrades.reduce(
+      (acc, trade) => acc + trade.requesterUnread,
+      0
+    );
+    setSellingNotifications(sellingCounts);
+    setPurchasingNotifications(purchasingCounts);
   }, []);
   return (
     <View style={style.wrapper}>
       <Text style={style.zoneTitle}>내 정보</Text>
-      <ProfileZone />
+      <ProfileZone navigation={navigation} />
       {/* <Divider style={{ backgroundColor: "#ccc" }} /> */}
       <Text style={style.zoneTitle}>내 거래</Text>
       <View style={style.row}>
@@ -60,40 +51,46 @@ function Menu({ state, navigation }: Props) {
           title="판매중 거래"
           action={() =>
             navigation.navigate("sellTradings", {
-              tradeIds: catchedTrades.map((trade) => trade.id),
+              tradeIds: state.catchedTrades.map((trade) => trade.id),
             })
           }
-          badgeCount={catchedTrades.length > 0 && catchedTrades.length}
+          badgeCount={state.catcherUnread}
         />
         <SingleButton
           iconName={faExchangeAlt}
           title="구매중 거래"
           action={() =>
             navigation.navigate("purchaseTradings", {
-              tradeIds: purchasingTrades.map((trade) => trade.id),
+              tradeIds: state.requestedTrades
+                .filter((trade) => trade.catcher)
+                .map((trade) => trade.id),
             })
           }
-          badgeCount={purchasingTrades.length > 0 && purchasingTrades.length}
+          badgeCount={state.requesterUnread}
         />
         <SingleButton
           iconName={faWallet}
           title="내 지갑"
           action={() => navigation.navigate("Wallet")}
         />
-        <SingleButton
-          iconName={faCog}
-          title="설정"
-          action={() => navigation.navigate("Setting")}
-        />
+        <SingleButton iconName={faCog} title="설정" action={() => navigation.navigate("Setting")} />
       </View>
       <View style={style.row}>
         <SingleButton
           iconName={faBullhorn}
           title="공지사항"
-          action={() => true}
+          action={() => navigation.navigate("Notice")}
         />
-        <SingleButton iconName={faInfo} title="정보" action={() => true} />
-        <SingleButton iconName={faEnvelope} title="문의" action={() => true} />
+        <SingleButton
+          iconName={faInfo}
+          title="정보"
+          action={() => navigation.navigate("Information")}
+        />
+        <SingleButton
+          iconName={faEnvelope}
+          title="문의"
+          action={() => navigation.navigate("Contact")}
+        />
         <SingleButton iconName={faCode} title="dad" action={() => true} />
       </View>
     </View>
@@ -122,12 +119,7 @@ interface SingleButtonProps {
   action: () => void;
   badgeCount?: number;
 }
-function SingleButton({
-  iconName,
-  title,
-  action,
-  badgeCount,
-}: SingleButtonProps) {
+function SingleButton({ iconName, title, action, badgeCount }: SingleButtonProps) {
   const style = StyleSheet.create({
     container: {
       width: "25%",
@@ -165,19 +157,12 @@ function SingleButton({
   return (
     <TouchableOpacity onPress={action} containerStyle={style.container}>
       <View style={style.box}>
-        {badgeCount && (
+        {badgeCount > 0 && (
           <View style={style.badge}>
-            <Text style={{ color: "white", fontSize: 12, fontWeight: "bold" }}>
-              {badgeCount}
-            </Text>
+            <Text style={{ color: "white", fontSize: 12, fontWeight: "bold" }}>{badgeCount}</Text>
           </View>
         )}
-        <FontAwesomeIcon
-          size={34}
-          icon={iconName}
-          style={{ bottom: 5 }}
-          color="#333"
-        />
+        <FontAwesomeIcon size={34} icon={iconName} style={{ bottom: 5 }} color="#333" />
         <Text style={style.text}>{title}</Text>
       </View>
     </TouchableOpacity>
