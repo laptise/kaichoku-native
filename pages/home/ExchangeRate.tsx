@@ -29,7 +29,8 @@ function ExchangeRate() {
     <View
       style={{
         justifyContent: "center",
-        backgroundColor: "white",
+        // backgroundColor: "white",
+        borderRadius: 10,
         minHeight: 140,
         alignItems: "center",
       }}
@@ -54,10 +55,7 @@ function ExchangeRate() {
               현재환율
             </Text>
             <TouchableOpacity
-              onPress={() =>
-                new Date().valueOf() - timeStamp.valueOf() > 5000 &&
-                getExchangeRate()
-              }
+              onPress={() => new Date().valueOf() - timeStamp.valueOf() > 5000 && getExchangeRate()}
             >
               <View
                 style={{
@@ -66,12 +64,9 @@ function ExchangeRate() {
                   alignItems: "center",
                 }}
               >
-                <Text
-                  style={{ fontSize: 12, textAlign: "center", marginRight: 5 }}
-                >
-                  {timeStamp.getFullYear()}년{timeStamp.getMonth() + 1}월
-                  {timeStamp.getDate()}일 {timeStamp.getHours()}시
-                  {timeStamp.getMinutes()}분 취득
+                <Text style={{ fontSize: 12, textAlign: "center", marginRight: 5 }}>
+                  {timeStamp.getFullYear()}년{timeStamp.getMonth() + 1}월{timeStamp.getDate()}일{" "}
+                  {timeStamp.getHours()}시{timeStamp.getMinutes()}분 취득
                 </Text>
                 {new Date().valueOf() - timeStamp.valueOf() > 5000 && (
                   <FontAwesomeIcon size={10} icon={faSyncAlt} />

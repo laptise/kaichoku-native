@@ -1,12 +1,5 @@
-import React, { useEffect, useState } from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  Image,
-  RefreshControl,
-  ActivityIndicator,
-} from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { StyleSheet, Text, View, Image, RefreshControl, ActivityIndicator } from "react-native";
 import { Divider, Button } from "react-native-elements";
 import { connect } from "react-redux";
 import themeColor from "../../../components/colors";
@@ -19,17 +12,17 @@ import { InitialState, Props } from "../../../store/reducer";
 import * as Trade from "../../../firebase/firestore/trades";
 import * as User from "../../../firebase/firestore/users";
 import RequesterInfoArea from "./components/RequesterInfoArea";
+import MapView, { PROVIDER_GOOGLE, Marker, Callout } from "react-native-maps";
 
 function RequestInfo({ route, navigation, state }: Props) {
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(false);
   const { id } = route.params;
-  const questType: "acceptable" | "requesting" | "catched" =
-    route.params && route.params.type;
+  const questType: "acceptable" | "requesting" | "catched" = route.params && route.params.type;
   const [result, setResult] = useState(null as Trade.Class);
   const [requester, setRequester] = useState(null as User.Class);
   const dbh = state.firebase.firestore();
-
+  const markerRef = useRef(null);
   const catchRequest = async () => {
     const userId = state.firebase.auth().currentUser.uid;
     const docRef = dbh.collection("trades").doc(id);
@@ -62,9 +55,7 @@ function RequestInfo({ route, navigation, state }: Props) {
           alignItems: "center",
           justifyContent: "center",
         }}
-        refreshControl={
-          <RefreshControl style={{ alignSelf: "center" }} refreshing={true} />
-        }
+        refreshControl={<RefreshControl style={{ alignSelf: "center" }} refreshing={true} />}
       />
     );
   else
@@ -72,9 +63,7 @@ function RequestInfo({ route, navigation, state }: Props) {
       <ScrollView contentContainerStyle={{ justifyContent: "flex-start" }}>
         <View style={style.wrapper}>
           <View style={style.info}>
-            <View
-              style={{ padding: 10, backgroundColor: "white", borderRadius: 5 }}
-            >
+            <View style={{ padding: 10, backgroundColor: "white", borderRadius: 5 }}>
               <Text>
                 {result.created_at.getFullYear() +
                   "년" +
@@ -84,9 +73,7 @@ function RequestInfo({ route, navigation, state }: Props) {
                   "일"}
               </Text>
             </View>
-            <Text style={[style.title, { marginVertical: 15 }]}>
-              {result.title}
-            </Text>
+            <Text style={[style.title, { marginVertical: 15 }]}>{result.title}</Text>
             <Text style={{ fontSize: 16, fontWeight: "bold" }}>상품명</Text>
             <Divider
               style={{
@@ -99,45 +86,44 @@ function RequestInfo({ route, navigation, state }: Props) {
             <View style={[style.target, { marginBottom: 30 }]}>
               <Text style={[style.title]}>{result.name}</Text>
             </View>
-            <Text
-              style={{
-                alignSelf: "flex-start",
-                fontWeight: "bold",
-                fontSize: 16,
-                marginLeft: 10,
-              }}
-            >
-              사진
-            </Text>
-            <Text>{loading}</Text>
+
             {result.images && result.images.length > 0 && (
-              <Swiper
-                style={style.slider}
-                showsButtons={false}
-                showsPagination={false}
-              >
-                {result.images.map((url, index) => (
-                  <View style={{ position: "relative" }}>
-                    <Image
-                      onLoadStart={() => setLoading(true)}
-                      onLoadEnd={() => setLoading(false)}
-                      key={index}
-                      style={{ width: "100%", height: "100%" }}
-                      source={{ uri: url }}
-                    />
-                    {loading && (
-                      <ActivityIndicator
-                        size="large"
-                        style={{
-                          position: "absolute",
-                          alignSelf: "center",
-                          top: "48%",
-                        }}
+              <>
+                <Text
+                  style={{
+                    alignSelf: "flex-start",
+                    fontWeight: "bold",
+                    fontSize: 16,
+                    marginLeft: 10,
+                  }}
+                >
+                  사진
+                </Text>
+                <Text>{loading}</Text>
+                <Swiper style={style.slider} showsButtons={false} showsPagination={false}>
+                  {result.images.map((url, index) => (
+                    <View style={{ position: "relative" }} key={index}>
+                      <Image
+                        onLoadStart={() => setLoading(true)}
+                        onLoadEnd={() => setLoading(false)}
+                        key={index}
+                        style={{ width: "100%", height: "100%" }}
+                        source={{ uri: url }}
                       />
-                    )}
-                  </View>
-                ))}
-              </Swiper>
+                      {loading && (
+                        <ActivityIndicator
+                          size="large"
+                          style={{
+                            position: "absolute",
+                            alignSelf: "center",
+                            top: "48%",
+                          }}
+                        />
+                      )}
+                    </View>
+                  ))}
+                </Swiper>
+              </>
             )}
             <Text
               style={{
@@ -191,17 +177,59 @@ function RequestInfo({ route, navigation, state }: Props) {
                 fontWeight: "bold",
                 fontSize: 16,
                 marginLeft: 10,
+                marginBottom: 10,
               }}
             >
               의뢰내용
             </Text>
+            {result.placeInfo && (
+              <>
+                {/* <Text
+                  style={{
+                    alignSelf: "flex-start",
+                    fontWeight: "bold",
+                    fontSize: 16,
+                    marginLeft: 10,
+                  }}
+                >
+                  구매처 정보
+                </Text> */}
+                <MapView
+                  onRegionChangeComplete={() =>
+                    markerRef && markerRef.current && markerRef.current.showCallout()
+                  }
+                  provider={PROVIDER_GOOGLE}
+                  region={{
+                    ...result.placeInfo.location,
+                    latitudeDelta: 0.01,
+                    longitudeDelta: 0.01,
+                  }}
+                  style={{
+                    width: "100%",
+                    aspectRatio: 1,
+                    borderWidth: 1,
+                    borderColor: "#ccc",
+                    borderRadius: 10,
+                  }}
+                >
+                  <Marker coordinate={result.placeInfo.location} ref={markerRef}>
+                    <Callout
+                      style={{ padding: 5, borderRadius: 10, maxWidth: "80%", minHeight: 60 }}
+                    >
+                      <Text style={{ fontWeight: "bold" }}>{result.placeInfo.name}</Text>
+                      <Text style={{ fontSize: 13 }}>{result.placeInfo.address}</Text>
+                    </Callout>
+                  </Marker>
+                </MapView>
+              </>
+            )}
             <View style={style.table}>
               <View style={style.tr}>
                 <View style={style.th}>
                   <Text>구매장소</Text>
                 </View>
                 <View style={style.td}>
-                  <Text>{result.place}</Text>
+                  <Text>{result.placeInfo ? result.placeInfo.name : result.place}</Text>
                 </View>
               </View>
               <View style={style.tr}>

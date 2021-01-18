@@ -1,3 +1,39 @@
+import { PlaceInformation } from "../../components/modals/PlaceSetter";
+
+export class Step {
+  at: Date;
+  constructor(at: Date) {
+    this.at = at;
+  }
+}
+
+class Steps {
+  0: Step;
+  1?: Step;
+  2?: Step;
+  3?: Step;
+  4?: Step;
+  5?: Step;
+  6?: Step;
+  7?: Step;
+  8?: Step;
+  9?: Step;
+  constructor(steps: Step[]) {
+    steps.forEach((step, index) => {
+      const object = this as any;
+      object[index] = step;
+    });
+  }
+
+  get length() {
+    let length = 0;
+    for (const [key, value] of Object.entries(this)) {
+      length = Number(key);
+    }
+    return length;
+  }
+}
+
 class Message {
   _id: string;
   createdAt: Date;
@@ -41,6 +77,22 @@ export const tradeStatusConverter = {
   },
 };
 
+function stepsConverter(steps: any) {
+  let stepArray = [] as Step[];
+  if (steps)
+    for (const [key, value] of Object.entries(steps)) {
+      const step = steps[key];
+      const newStep = new Step(step["at"].toDate()) as any;
+      for (const [stepKey, stepValue] of Object.entries(steps[key])) {
+        if (stepKey !== "at") {
+          newStep[stepKey] = stepValue;
+        }
+      }
+      stepArray.push(newStep);
+    }
+  return stepArray.length > 0 ? new Steps(stepArray) : null;
+}
+
 class Trade {
   name: string;
   place: string;
@@ -55,8 +107,8 @@ class Trade {
   messages: Message[];
   requesterUnread: number;
   catcherUnread: number;
-  tradeStatus?: TradeStatus[];
-  isSell?: true;
+  steps: Steps;
+  placeInfo: PlaceInformation;
   constructor(
     id: string,
     name: string,
@@ -71,8 +123,8 @@ class Trade {
     messages: Message[],
     requesterUnread: number,
     catcherUnread: number,
-    tradeStatus: TradeStatus[],
-    isSell?: true
+    steps: Steps,
+    placeInfo: PlaceInformation
   ) {
     this.id = id;
     this.name = name;
@@ -87,8 +139,8 @@ class Trade {
     this.messages = messages;
     this.requesterUnread = requesterUnread;
     this.catcherUnread = catcherUnread;
-    this.tradeStatus = tradeStatus;
-    this.isSell = isSell;
+    this.steps = steps;
+    this.placeInfo = placeInfo;
   }
 }
 const Converter = {
@@ -106,7 +158,8 @@ const Converter = {
       images: trade.images,
       catcherUnread: trade.catcherUnread,
       requesterUnread: trade.catcherUnread,
-      tradeStatus: trade.tradeStatus,
+      steps: trade.steps,
+      placeInfo: trade.placeInfo,
     };
   },
   fromFirestore: function (
@@ -128,7 +181,8 @@ const Converter = {
       data.messages,
       data.requesterUndrea,
       data.catcherUnread,
-      data.tradeStatus
+      stepsConverter(data.steps),
+      data.placeInfo
     );
   },
 };

@@ -106,7 +106,7 @@ const style = StyleSheet.create({
   },
 
   wrapper: {
-    backgroundColor: "white",
+    // backgroundColor: "white",
     flex: 1,
   },
   row: {

@@ -8,6 +8,7 @@
     "eject": "expo eject"
   },
   "dependencies": {
+    "@dudigital/react-native-zoomable-view": "^1.0.16",
     "@fortawesome/fontawesome-svg-core": "^1.2.32",
     "@fortawesome/free-brands-svg-icons": "^5.15.1",
     "@fortawesome/free-regular-svg-icons": "^5.15.1",
@@ -22,13 +23,16 @@
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.5.0",
     "@testing-library/user-event": "^7.2.1",
+    "@types/firebase": "^3.2.1",
     "axios": "^0.20.0",
     "babel-plugin-dotenv-import": "^2.1.0",
     "dotenv": "^8.2.0",
     "expo": "~39.0.2",
     "expo-image-manipulator": "~8.3.0",
     "expo-image-picker": "~9.1.0",
+    "expo-image-picker-multiple": "^1.3.1",
     "expo-linear-gradient": "~8.3.0",
+    "expo-notifications": "~0.7.2",
     "expo-status-bar": "~1.0.2",
     "express": "^4.17.1",
     "firebase": "^7.9.0",
@@ -46,6 +50,7 @@
     "react-native-gifted-chat": "^0.16.3",
     "react-native-image-zoom-viewer": "^3.0.1",
     "react-native-linear-gradient": "^2.5.6",
+    "react-native-maps": "0.27.1",
     "react-native-reanimated": "~1.13.0",
     "react-native-safe-area-context": "3.1.4",
     "react-native-screens": "~2.10.1",
@@ -53,6 +58,7 @@
     "react-native-swiper": "^1.6.0",
     "react-native-vector-icons": "^7.1.0",
     "react-native-web": "~0.13.12",
+    "react-navigation": "^4.4.3",
     "react-redux": "^7.2.1",
     "react-router-dom": "^5.2.0",
     "react-scripts": "3.4.3",
@@ -62,8 +68,7 @@
     "redux-form": "^8.3.6",
     "redux-thunk": "^2.3.0",
     "sha256": "^0.2.0",
-    "react-native-maps": "0.27.1",
-    "expo-notifications": "~0.7.2"
+    "@react-native-community/slider": "3.0.3"
   },
   "devDependencies": {
     "@babel/core": "~7.9.0",

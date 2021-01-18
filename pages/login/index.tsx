@@ -231,6 +231,7 @@ const styles = StyleSheet.create({
     height: "100%",
     zIndex: 100,
     backgroundColor: "white",
+    borderRadius: 10,
   },
   safeArea: {
     height: "100%",

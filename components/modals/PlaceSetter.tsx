@@ -1,9 +1,15 @@
 import React, { useRef, useState } from "react";
 
 import Axios from "axios";
-import MapView, { AnimatedRegion, LatLng, Marker, PROVIDER_GOOGLE } from "react-native-maps";
+import MapView, {
+  AnimatedRegion,
+  Callout,
+  LatLng,
+  Marker,
+  PROVIDER_GOOGLE,
+} from "react-native-maps";
 import { Geometry, PlaceAPIResponce } from "../../models/placeAPIResponse";
-import { Modal, SafeAreaView, Text, View, StyleSheet, Button } from "react-native";
+import { Modal, SafeAreaView, Text, View, StyleSheet, Button, Alert } from "react-native";
 import {
   ScrollView,
   TextInput,
@@ -20,7 +26,10 @@ export interface PlaceInformation {
 }
 
 async function searchPlace(text: string) {
-  if (!text) return;
+  if (!text) {
+    Alert.alert("검색 실패", "검색어를 입력해주세요");
+    return [];
+  }
   const queryString = text.replace(/ |　/g, "+");
   const places = await Axios.get(
     `https://maps.googleapis.com/maps/api/place/textsearch/json?inputtype=textquery&query=${queryString}&fields=formatted_address,name,geometry&language=ko&key=AIzaSyCRmpR4CwNGQk43Q_wln9B6K39FpxTQsZQ`
@@ -32,7 +41,6 @@ async function searchPlace(text: string) {
       latitude: place.geometry.location["lat"],
       longitude: place.geometry.location["lng"],
     };
-    console.log(location);
     const info: PlaceInformation = {
       id: place.place_id,
       name: place.name,
@@ -46,14 +54,18 @@ async function searchPlace(text: string) {
 
 interface ModalProps {
   visibleState: [boolean, React.Dispatch<boolean>];
+  output?: React.Dispatch<PlaceInformation>;
 }
-export default function PlaceSearcherModal({ visibleState }: ModalProps) {
+export default function PlaceSearcherModal({ visibleState, output }: ModalProps) {
   const [visible, setVisible] = visibleState;
   const [keyword, setKeyword] = useState("");
   const [results, setResults] = useState([] as PlaceInformation[]);
   const [target, setTarget] = useState(null as PlaceInformation);
-  console.log(target);
-  const region = new AnimatedRegion();
+  const markerRef = useRef(null as Marker);
+  const confirm = () => {
+    target && output && output(target);
+    setVisible(false);
+  };
   return (
     <Modal
       animationType="fade"
@@ -68,7 +80,9 @@ export default function PlaceSearcherModal({ visibleState }: ModalProps) {
     >
       <SafeAreaView>
         <View style={style.container}>
-          <Text>구매처 검색하기</Text>
+          <Text style={{ fontSize: 16, marginBottom: 10, fontWeight: "bold" }}>
+            구매처 검색하기
+          </Text>
           <View style={style.header}>
             <View style={style.searchBar}>
               <TextInput
@@ -77,21 +91,23 @@ export default function PlaceSearcherModal({ visibleState }: ModalProps) {
               ></TextInput>
               <TouchableOpacity
                 containerStyle={{ marginLeft: "auto" }}
-                style={{ ...style.openButton, backgroundColor: "#2196F3" }}
+                style={{ ...style.openButton, backgroundColor: "#2196F3", height: "100%" }}
                 onPress={async () => setResults(await searchPlace(keyword))}
               >
-                <Text>검색</Text>
+                <Text style={{ color: "white" }}>검색</Text>
               </TouchableOpacity>
             </View>
           </View>
           <View style={style.body}>
-            {results.length === 0 && <Text>여기에 검색결과가 표시됩니다.</Text>}
+            {results.length === 0 && (
+              <Text style={{ padding: 10 }}>여기에 검색결과가 표시됩니다.</Text>
+            )}
             <ScrollView>
               {results.length > 0 &&
                 results.map((res, index) => (
                   <View
                     key={index}
-                    onTouchStart={() => setTarget(res)}
+                    onTouchEnd={() => setTarget(res)}
                     style={{
                       ...style.single,
                       backgroundColor: res === target ? themeColor(3) : "white",
@@ -111,13 +127,16 @@ export default function PlaceSearcherModal({ visibleState }: ModalProps) {
             region={target && { ...target.location, latitudeDelta: 0.05, longitudeDelta: 0.05 }}
             style={style.map}
             provider={PROVIDER_GOOGLE}
+            onRegionChangeComplete={() =>
+              markerRef && markerRef.current && markerRef.current.showCallout()
+            }
           >
             {target && (
-              <Marker coordinate={target.location}>
-                <View style={{ backgroundColor: "white", padding: 10, borderRadius: 10 }}>
+              <Marker coordinate={target.location} ref={markerRef}>
+                <Callout style={{ padding: 5, borderRadius: 10, maxWidth: "80%", minHeight: 60 }}>
                   <Text style={{ fontWeight: "bold" }}>{target.name}</Text>
                   <Text style={{ fontSize: 13 }}>{target.address}</Text>
-                </View>
+                </Callout>
               </Marker>
             )}
           </MapView>
@@ -125,7 +144,7 @@ export default function PlaceSearcherModal({ visibleState }: ModalProps) {
             <TouchableOpacity onPress={() => setVisible(false)}>
               <Text style={style.buttons}>취소</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => setVisible(false)}>
+            <TouchableOpacity onPress={confirm}>
               <Text style={style.buttons}>선택</Text>
             </TouchableOpacity>
           </View>
@@ -141,27 +160,37 @@ const style = StyleSheet.create({
     height: "100%",
   },
   searchBar: {
-    padding: 10,
     borderWidth: 1,
     borderColor: "#ccc",
     flexDirection: "row",
+    borderRadius: 10,
   },
   header: {
-    height: 60,
+    height: 40,
   },
   body: {
     flex: 1,
-    paddingVertical: 20,
+    marginVertical: 20,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 10,
   },
   map: {
     flex: 1,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 10,
   },
-  textInput: {},
+  textInput: {
+    padding: 10,
+  },
   openButton: {
     backgroundColor: "#F194FF",
-    borderRadius: 20,
+    borderRadius: 10,
     padding: 10,
     elevation: 2,
+    borderTopLeftRadius: 0,
+    borderBottomLeftRadius: 0,
   },
   tools: {
     marginTop: 10,

@@ -2,10 +2,11 @@ import React, { useEffect, useState } from "react";
 import { createStore, Dispatch } from "redux";
 import { StatusBar } from "expo-status-bar";
 import { connect, Provider } from "react-redux";
-import { SafeAreaView, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { setMenuView, setDbh, setFirebase, setUser } from "./store/action";
 import reducer, { Props } from "./store/reducer";
 import Header from "./pages/partial/Header";
+import { SafeAreaView } from "react-navigation";
 import Blocker from "./pages/login";
 import Menu from "./pages/menus";
 import Home from "./pages/home/Home";
@@ -17,6 +18,8 @@ import { faHome, faEllipsisH, faExchangeAlt } from "@fortawesome/free-solid-svg-
 import { createStackNavigator } from "@react-navigation/stack";
 import firebase from "./firebase";
 import * as Trade from "./firebase/firestore/trades";
+import themeColor from "./components/colors";
+import { LinearGradient } from "expo-linear-gradient";
 const store = createStore(reducer);
 const Tab = createBottomTabNavigator();
 function App({ state, setFirebase }: Props) {
@@ -25,13 +28,13 @@ function App({ state, setFirebase }: Props) {
   }, []);
   return (
     <>
-      <StatusBar style={"dark"} />
+      <StatusBar style={"light"} />
       <NavigationContainer>
         {state.user ? (
           <>
             <Header />
             <Tab.Navigator
-              initialRouteName="메뉴"
+              initialRouteName="홈"
               screenOptions={({ route }) => ({
                 tabBarIcon: ({ focused, color, size }) => {
                   let iconName;
@@ -90,18 +93,20 @@ const AppContainer = connect(mapStateToProps, mapDispatchToProps)(App);
 
 function AppProvider() {
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar />
-      <Provider store={store}>
-        <AppContainer />
-      </Provider>
-    </SafeAreaView>
+    <LinearGradient start={[0, 0.55]} end={[1, 0.45]} colors={[themeColor(1, 0.9), themeColor(4)]}>
+      <SafeAreaView forceInset={{ bottom: "never" }} style={styles.container}>
+        <StatusBar />
+        <Provider store={store}>
+          <AppContainer />
+        </Provider>
+      </SafeAreaView>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "white",
+    borderRadius: 10,
     height: "100%",
     width: "100%",
   },

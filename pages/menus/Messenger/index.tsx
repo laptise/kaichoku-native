@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Platform, StyleSheet, Text, View } from "react-native";
 import { InitialState, Props } from "../../../store/reducer";
 import { connect } from "react-redux";
 import { ScrollView } from "react-native-gesture-handler";
-import { GiftedChat, Bubble, Time } from "react-native-gifted-chat";
+import { GiftedChat, Bubble, Time, InputToolbar, Send } from "react-native-gifted-chat";
 import * as User from "../../../firebase/firestore/users";
 import * as Trade from "../../../firebase/firestore/trades";
 import "dayjs/locale/ko";
@@ -99,7 +99,19 @@ function Messenger({ state, route }: Props) {
       .then((doc) => doc.data());
     setUser(user);
   };
-
+  const renderSend = (props) => {
+    return (
+      <Send>
+        <View>
+          <Text>dddaa</Text>
+        </View>
+      </Send>
+    );
+  };
+  const renderInputToolbar = (props) => {
+    console.log(props);
+    return <InputToolbar {...props} />;
+  };
   useEffect(() => {
     getUser();
     const recipient = isCatcher
@@ -121,10 +133,10 @@ function Messenger({ state, route }: Props) {
       <GiftedChat
         renderTime={renderTime}
         renderBubble={renderBubble}
-        messagesContainerStyle={{ marginBottom: 50 }}
         locale="ko"
         placeholder="메세지를 입력하세요"
         messages={messages}
+        bottomOffset={(Platform.OS === "ios" && 80) || null}
         onSend={onSend}
         user={{
           _id: state.firebase.auth().currentUser.uid,

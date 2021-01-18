@@ -57,32 +57,7 @@ function TradesMain({ navigation, state }: Props) {
     <>
       <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
         <View style={{ flex: 1 }}>
-          {catchedList.length > 0 && (
-            <TradeList
-              title="진행중인 거래"
-              navigation={navigation}
-              trades={[...state.catchedTrades]}
-              tradeType="catched"
-              statusMessage={[
-                "수락된 거래가 없습니다!",
-                "거래가 진행중입니다. 틈틈히 확인해주세요!",
-              ]}
-              themeColor={"black"}
-            />
-          )}
-          {RequestingList.length > 0 && (
-            <TradeList
-              title="의뢰중인 거래"
-              navigation={navigation}
-              trades={RequestingList}
-              tradeType="requesting"
-              statusMessage={[
-                "아직 의뢰중인 거래는 없습니다! ",
-                "의뢰중인 거래입니다. 누군가 의뢰를 받아줄때까지 잠시만 기다려주세요.",
-              ]}
-              themeColor={"black"}
-            />
-          )}
+          <Text>해야 할일</Text>
           {AcceptableList.length > 0 && (
             <TradeList
               title="수락가능한 거래"

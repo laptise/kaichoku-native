@@ -2,10 +2,7 @@ import React, { useEffect, useState } from "react";
 import { postLogin, setMenuView, setRequested, setCatched } from "../../store/action";
 import { Button, StyleSheet, Text, View, Animated } from "react-native";
 import { connect } from "react-redux";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { FontAwesome } from "@expo/vector-icons";
 import { InitialState, Props } from "../../store/reducer";
-import { faBars, faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import themeColor from "../../components/colors";
 import * as Trade from "../../firebase/firestore/trades";
 
@@ -16,19 +13,16 @@ function Header({ state, setMenuView, setCatched, setRequested }: Props) {
   const [user, setUser] = useState(false);
 
   useEffect(() => {
-    // state.firebase
-    //   .firestore()
-    //   .collection("trades")
-    //   .where("catcher", ">", "")
-    //   .get()
-    //   .then((snapshot) => {
-    //     snapshot.forEach((doc) => {
-    //       doc.ref
-    //         .collection("tradeStatus")
-    //         .doc("catched")
-    //         .set({ at: new Date(2020, 11, 9), action: "catched" });
-    //     });
-    //   });
+    state.firebase
+      .firestore()
+      .collection("trades")
+      .where("catcher", ">", "")
+      .get()
+      .then((snapshot) => {
+        snapshot.forEach((doc) => {
+          doc.ref.update({ "steps.1": { at: new Date(2020, 7, 7) } });
+        });
+      });
     state.firebase.auth().onAuthStateChanged(function (user) {
       if (user) {
         setUser(false);
@@ -55,8 +49,8 @@ function Header({ state, setMenuView, setCatched, setRequested }: Props) {
   return (
     <View style={styles.header}>
       <Text style={styles.text}>
-        <Text style={{ color: themeColor(1) }}>직접하는 </Text>
-        <Text style={{ color: themeColor(6) }}>해외직구,</Text>
+        <Text style={{ color: themeColor(1), ...styles.text }}>직접하는 </Text>
+        <Text style={{ color: "white", ...styles.text }}>해외직구,</Text>
         <Text> 해직</Text>
       </Text>
     </View>
@@ -66,9 +60,8 @@ function Header({ state, setMenuView, setCatched, setRequested }: Props) {
 const styles = StyleSheet.create({
   header: {
     zIndex: 1,
-    backgroundColor: "white",
-    height: 40,
     shadowColor: "#000",
+    paddingBottom: 10,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -77,7 +70,7 @@ const styles = StyleSheet.create({
     shadowRadius: 1.84,
     elevation: 1,
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
   },
   navButton: {
     right: 0,
@@ -89,6 +82,9 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     flex: 8,
     fontSize: 20,
+    textShadowColor: "rgba(255,255,255,0.7)",
+    textShadowOffset: { height: 0, width: 0 },
+    textShadowRadius: 1,
   },
 });
 

@@ -3,7 +3,6 @@ import { InitialState, Props } from "../../../store/reducer";
 import {
   StyleSheet,
   View,
-  Animated,
   TextInput,
   ScrollView,
   Platform,
@@ -18,10 +17,11 @@ import { Button, Divider, Text } from "react-native-elements";
 import themeColor from "../../../components/colors";
 import * as Trade from "../../../firebase/firestore/trades";
 import * as ImagePicker from "expo-image-picker";
+import IP from "../../../components/modals/ImagePicker";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import Axios from "axios";
 import { PlaceAPIResponce } from "../../../models/placeAPIResponse";
-import PlaceSearcherModal from "../../../components/modals/PlaceSetter";
+import PlaceSearcherModal, { PlaceInformation } from "../../../components/modals/PlaceSetter";
 interface FormData {
   requestTitle: string;
   productName: string;
@@ -43,7 +43,7 @@ function AddNewRequest({ navigation, route, state }: Props) {
   const auth = firebase.auth();
   const [loading, setLoading] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-
+  const [place, setPlace] = useState(null as PlaceInformation);
   const formData: FormData = {
     requestTitle,
     productName,
@@ -56,7 +56,7 @@ function AddNewRequest({ navigation, route, state }: Props) {
       if (Platform.OS !== "web") {
         const { status } = await ImagePicker.requestCameraRollPermissionsAsync();
         if (status !== "granted") {
-          alert("Sorry, we need camera roll permissions to make this work!");
+          Alert.alert("Sorry, we need camera roll permissions to make this work!");
         }
       }
     })();
@@ -110,7 +110,7 @@ function AddNewRequest({ navigation, route, state }: Props) {
         new Trade.Class(
           docAndImages.doc.id,
           formData.productName,
-          formData.purchasePlace,
+          place ? null : formData.purchasePlace,
           Number(formData.price),
           Number(formData.fee),
           formData.requestTitle,
@@ -121,7 +121,8 @@ function AddNewRequest({ navigation, route, state }: Props) {
           null,
           0,
           0,
-          null
+          null,
+          place
         )
       );
     Alert.alert("등록완료", "새로운 의뢰를 추가했습니다\n내 거래에서 확인하실 수 있습니다.");
@@ -131,102 +132,144 @@ function AddNewRequest({ navigation, route, state }: Props) {
       type: "requesting",
     });
   };
-  const searchPlace = async () => {};
   return (
-    <ScrollView>
-      <PlaceSearcherModal visibleState={[modalVisible, setModalVisible]} />
-      <View
-        style={{
-          flex: 1,
-          alignItems: "center",
-          padding: 20,
-        }}
-      >
-        <Text style={{ padding: 20, fontSize: 24 }}>상품구매 의뢰하기</Text>
-        <Divider style={{ height: 2, backgroundColor: themeColor(3), width: "70%" }} />
-        <View style={{ marginVertical: 20 }}>
-          <Text>기재내용이 자세할수록 발송자가 물건을 찾기 쉬워져요.</Text>
-          <Text>최대한 자세하게 적어주세요!</Text>
-        </View>
-        <Text style={[table.label]}>의뢰제목</Text>
-        <View style={[table.table, table.th]}>
-          <TextInput onChangeText={(e) => setRequestTitle(e)} placeholder="의뢰제목" />
-        </View>
-        <Text style={[table.label]}>구매처정보</Text>
-        <View style={[table.table, table.th]}>
-          <TextInput onChangeText={(e) => setPurchasePlace(e)} placeholder="구매장소" />
-        </View>
-        <TouchableOpacity onPress={() => setModalVisible(true)}>
-          <Text>검색</Text>
-        </TouchableOpacity>
-        <Text style={[table.label]}>상품정보</Text>
-        <View style={[table.table, table.th]}>
-          <TextInput onChangeText={(e) => setProductName(e)} placeholder="상품명" />
-        </View>
-        <Text style={[table.label]}>링크</Text>
-        <View style={[table.table, table.th]}>
-          <TextInput
-            onChangeText={(e) => setPurchasePlace(e)}
-            placeholder="참고 URL링크 (상품 홈페이지 등)"
-          />
-        </View>
-        <Text style={[table.label]}>가격</Text>
-        <View style={[table.table, table.th]}>
-          <TextInput
-            onChangeText={(e) => setPrice(e)}
-            keyboardType="number-pad"
-            placeholder="가격"
-          />
-        </View>
-        <Text style={[table.label]}>수수료</Text>
-        <View style={[table.table, table.th]}>
-          <TextInput
-            onChangeText={(e) => setPrice(e)}
-            keyboardType="number-pad"
-            placeholder="수수료"
-          />
-        </View>
-        {/* <CategorySelector /> */}
-        {images.length > 0 && (
-          <Swiper style={style.slider} showsButtons={false} showsPagination={false}>
-            {images.length > 0 &&
-              images.map((image, index) => (
-                <View key={index} style={style.slide1}>
-                  <Image
-                    key={index}
-                    style={{ width: "100%", height: "100%" }}
-                    source={{ uri: image }}
-                  />
-                  <TextInput />
-                </View>
-              ))}
-          </Swiper>
-        )}
-        <View style={{ flexDirection: "row" }}>
-          <TouchableOpacity containerStyle={style.bottomButtonViews}>
-            <View
-              style={{ backgroundColor: themeColor(3), padding: 10, borderRadius: 5, margin: 10 }}
-            >
-              <Text style={{ color: "white" }}>취소</Text>
+    <>
+      <IP />
+      <ScrollView>
+        <PlaceSearcherModal output={setPlace} visibleState={[modalVisible, setModalVisible]} />
+        <View
+          style={{
+            flex: 1,
+            alignItems: "center",
+            padding: 20,
+          }}
+        >
+          <Text style={{ padding: 20, fontSize: 24 }}>상품구매 의뢰하기</Text>
+          <Divider style={{ height: 2, backgroundColor: themeColor(3), width: "70%" }} />
+          <View style={{ marginVertical: 20 }}>
+            <Text>기재내용이 자세할수록 발송자가 물건을 찾기 쉬워져요.</Text>
+            <Text>최대한 자세하게 적어주세요!</Text>
+          </View>
+          <Text style={[table.label]}>의뢰제목</Text>
+          <View style={[table.table, table.th]}>
+            <TextInput onChangeText={(e) => setRequestTitle(e)} placeholder="의뢰제목" />
+          </View>
+          <Text style={[table.label]}>구매처정보</Text>
+          <View
+            style={[
+              table.table,
+              table.th,
+              {
+                flexDirection: "row",
+                padding: 0,
+                alignItems: "center",
+                maxHeight: place ? 50 : 40,
+              },
+            ]}
+          >
+            <View style={{ padding: 10, flex: 1 }}>
+              {place ? (
+                <>
+                  <Text style={{ fontWeight: "bold" }}>{place.name}</Text>
+                  <Text style={{ fontSize: 13 }}>{place.address}</Text>
+                </>
+              ) : (
+                <TextInput onChangeText={(e) => setPurchasePlace(e)} placeholder="구매장소" />
+              )}
             </View>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={pickImage} containerStyle={style.bottomButtonViews}>
-            <View
-              style={{ backgroundColor: themeColor(3), padding: 10, borderRadius: 5, margin: 10 }}
+            <TouchableOpacity
+              onPress={() => setModalVisible(true)}
+              style={{
+                backgroundColor: themeColor(4),
+                height: "100%",
+                flexDirection: "row",
+                justifyContent: "center",
+                borderTopRightRadius: 5,
+                borderBottomRightRadius: 5,
+              }}
+              containerStyle={{ width: 40, marginLeft: "auto" }}
             >
-              <Text style={{ color: "white" }}>사진추가</Text>
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={add} containerStyle={style.bottomButtonViews}>
-            <View
-              style={{ backgroundColor: themeColor(3), padding: 10, borderRadius: 5, margin: 10 }}
-            >
-              <Text style={{ color: "white" }}>의뢰등록</Text>
-            </View>
-          </TouchableOpacity>
+              <Text
+                style={{
+                  textAlign: "center",
+                  alignSelf: "center",
+                  color: "white",
+                  fontWeight: "bold",
+                }}
+              >
+                {place ? "편집" : "검색"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <Text style={[table.label]}>상품정보</Text>
+          <View style={[table.table, table.th]}>
+            <TextInput onChangeText={(e) => setProductName(e)} placeholder="상품명" />
+          </View>
+          <Text style={[table.label]}>링크</Text>
+          <View style={[table.table, table.th]}>
+            <TextInput
+              onChangeText={(e) => setPurchasePlace(e)}
+              placeholder="참고 URL링크 (상품 홈페이지 등)"
+            />
+          </View>
+          <Text style={[table.label]}>가격</Text>
+          <View style={[table.table, table.th]}>
+            <TextInput
+              onChangeText={(e) => setPrice(e)}
+              keyboardType="number-pad"
+              placeholder="가격"
+            />
+          </View>
+          <Text style={[table.label]}>수수료</Text>
+          <View style={[table.table, table.th]}>
+            <TextInput
+              onChangeText={(e) => setPrice(e)}
+              keyboardType="number-pad"
+              placeholder="수수료"
+            />
+          </View>
+          {/* <CategorySelector /> */}
+          {images.length > 0 && (
+            <Swiper style={style.slider} showsButtons={false} showsPagination={false}>
+              {images.length > 0 &&
+                images.map((image, index) => (
+                  <View key={index} style={style.slide1}>
+                    <Image
+                      key={index}
+                      style={{ width: "100%", height: "100%" }}
+                      source={{ uri: image }}
+                    />
+                    <TextInput />
+                  </View>
+                ))}
+            </Swiper>
+          )}
+          <View style={{ flexDirection: "row" }}>
+            <TouchableOpacity containerStyle={style.bottomButtonViews}>
+              <View
+                style={{ backgroundColor: themeColor(3), padding: 10, borderRadius: 5, margin: 10 }}
+              >
+                <Text style={{ color: "white" }}>취소</Text>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={pickImage} containerStyle={style.bottomButtonViews}>
+              <View
+                style={{ backgroundColor: themeColor(3), padding: 10, borderRadius: 5, margin: 10 }}
+              >
+                <Text style={{ color: "white" }}>사진추가</Text>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={add} containerStyle={style.bottomButtonViews}>
+              <View
+                style={{ backgroundColor: themeColor(3), padding: 10, borderRadius: 5, margin: 10 }}
+              >
+                <Text style={{ color: "white" }}>의뢰등록</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </>
   );
 }
 

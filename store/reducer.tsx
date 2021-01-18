@@ -2,6 +2,7 @@ import * as firebase from "firebase";
 import { act } from "react-dom/test-utils";
 import { Class as User } from "../firebase/firestore/users";
 import { Class as Trade } from "../firebase/firestore/trades";
+import { TrackHTMLAttributes } from "react";
 interface UnreadMessages {
   purchasing: number;
   selling: number;
@@ -35,6 +36,8 @@ const initialState: InitialState = {
 
 export interface Props {
   navigation?: any;
+  trades?: Trade[];
+  trade?: Trade;
   state?: InitialState;
   route?: any;
   user?: User;
