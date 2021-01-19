@@ -134,7 +134,6 @@ function AddNewRequest({ navigation, route, state }: Props) {
   };
   return (
     <>
-      <IP />
       <ScrollView>
         <PlaceSearcherModal output={setPlace} visibleState={[modalVisible, setModalVisible]} />
         <View
